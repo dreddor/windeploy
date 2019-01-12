@@ -44,11 +44,15 @@ Function InstallDistro {
     if (-NOT (Test-Path $HOME\WSL\archives\$distname.zip) ) {
         Write-Host "Downloading $distname WSL image from $disturl..."
         Invoke-WebRequest -Uri $disturl -Outfile $HOME\WSL\archives\$distname.zip -UseBasicParsing
-        if (-NOT (Test-Path $HOME\WSL\$distname) ) {
-            Write-Host "Extracting $distname WSL image..."
-            Expand-Archive -DestinationPath $HOME\WSL\$distname `
-                $HOME\WSL\archives\$distname.zip
-        }
+    }
+    if (-NOT (Test-Path $HOME\WSL\$distname) ) {
+        Write-Host "Extracting $distname WSL image..."
+        Expand-Archive -DestinationPath $HOME\WSL\$distname `
+            $HOME\WSL\archives\$distname.zip
+
+        Start-Process -FilePath $HOME\WSL\$distname\$distname.exe `
+          -ArgumentList install `
+          -NoNewWindow -Wait
     }
 }
 
@@ -66,7 +70,7 @@ Function SetupWSL() {
     Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
     #
     # Download the WSL ubuntu image if it does not already exist
-    InstallDistro -distname "ubuntu-1804" -disturl "https://aka.ms/wsl-ubuntu-1804"
+    InstallDistro -distname "ubuntu1804" -disturl "https://aka.ms/wsl-ubuntu-1804"
 }
 
 Function Main() {
@@ -81,8 +85,8 @@ Main
 # SIG # Begin signature block
 # MIIFrAYJKoZIhvcNAQcCoIIFnTCCBZkCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUm3haANWrHvmHcUtYw5TvbWNM
-# aFGgggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUEnhfHVmS+u41QhjylN2lfd3Y
+# rzqgggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
 # AQsFADAvMS0wKwYDVQQDDCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlm
 # aWNhdGUwHhcNMTkwMTEyMjE0MDM4WhcNMjAwMTEyMjIwMDM4WjAvMS0wKwYDVQQD
 # DCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlmaWNhdGUwggEiMA0GCSqG
@@ -103,11 +107,11 @@ Main
 # aWduZWQgQ29kZSBDZXJ0aWZpY2F0ZQIQdDJnWpUt9L9J1E+xJuLlkzAJBgUrDgMC
 # GgUAoHgwGAYKKwYBBAGCNwIBDDEKMAigAoAAoQKAADAZBgkqhkiG9w0BCQMxDAYK
 # KwYBBAGCNwIBBDAcBgorBgEEAYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAjBgkqhkiG
-# 9w0BCQQxFgQUXosRrKNGOPLksQESU5ZMi8PrFF4wDQYJKoZIhvcNAQEBBQAEggEA
-# Tqtxvpv06jBi5SCIBZWK98sDDC5P03WarrpXm9UEYefi3d7N6cGjKvYHxgNYqeX/
-# IsVlLf91lR77ITrk1bXe8W1NAyKcqiDPMWdz7hEUdUQw7WTmz/2dnCJhbXSY2tVQ
-# wi3ePDZZqiMh9B/xifPNTvRvXm5rig5CwPyts+JxEJ8QYq5DXN1Z/j4uwSmcjINS
-# +ezZzx5uLZo88pVSakva0NDzgcWB34TQtfnOTGEYRw2Y7QCyUztzfZ4Ac9shmGP/
-# Ho3Ip8IwurVKGR9BBK15TDkLnwkCFCUNr571PXmEV8XL+IAJ1/k4BI+6CCJBqWyB
-# uX/ZL2aC5vI9a/d4O8fePQ==
+# 9w0BCQQxFgQUGHZXXUlNh0nMhBDPYfgx32CwkggwDQYJKoZIhvcNAQEBBQAEggEA
+# hSAyJwhQd9NKfasTU7b7zWtwax6kNeeCzafheW+vT0M3GuF+IagI+flRaISAwJfR
+# iNvBCIX3YlHudUUt/KFifNTcS0n+38XPgcIlK7J87bcvISPDnPRKxF6vdWd5AHc5
+# 5xHldUp3WVgTaBOXIVRO9P/vOq6PFF5kEgDDdKIctDqBUIJ2nVskyFrpX8ufHEYQ
+# XPHmZNGdwfcUCe37y0DPQ2E5bFZ+JhoyRuQRi8j6nhfNCrSLpBwNg6bHt0WMV/My
+# UH/Fs2TQanPeZE9YQPpSl/e3p0YELFGR5pEeQKviNXNfKbrhgbIK64hvXCznRFhH
+# Njzr2T92F5xjJ6+ufz1gZA==
 # SIG # End signature block

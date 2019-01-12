@@ -1,3 +1,8 @@
+## Run Deploy
+```powershell
+powershell.exe -ExecutionPolicy ByPass -File .\setup.ps1
+```
+
 ## Generate a self-signed root certificate
 
 ```powershell

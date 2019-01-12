@@ -6,9 +6,10 @@ powershell.exe -ExecutionPolicy ByPass -File .\setup.ps1
 ## Generate a self-signed root certificate
 
 ```powershell
-$cert = New-SelfSignedCertificate -Subject "Dreddor Self-Signed Code Certificate" -Type CodeSigningCert -CertStoreLocation cert:\LocalMachine\My
-Move-Item -Path $cert.PSPath -Destination "Cert:\LocalMachine\Root\"
-$cert | Export-Certificate -FilePath .\dreddor_root_cert.cert
+$cert = New-SelfSignedCertificate -Subject "Dreddor Self-Signed Code Certificate" -Type CodeSigningCert -CertStoreLocation cert:\CurrentUser\My
+$cert | Export-Certificate -FilePath .\dreddor_code_signing.cert
+Import-Certificate -FilePath .\dreddor_code_signing.cert -Cert Cert:\CurrentUser\TrustedPublisher
+Import-Certificate -FilePath .\dreddor_code_signing.cert -Cert Cert:\CurrentUser\Root
 
 ```
 
@@ -21,7 +22,7 @@ Import-Certificate -Filepath ".\dreddor_root_cert.cert" -CertStoreLocation cert:
 
 ## Sign a script
 ```powershell
-$cert | Export-Certificate -FilePath .\dreddor_root_cert.cert
+Set-AuthenticodeSignature -FilePath .\setup.ps1 -Certificate $cert
 ```
 
 The certificate is signed with a cmdlet from this package:

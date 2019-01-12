@@ -1,8 +1,10 @@
 # Import the certificate that signed all these scripts
 Function ImportSelfSigningCert() {
     Write-Host "PSScriptRoot: $PSScriptRoot"
-    $cert = Import-Certificate -Filepath "$PSScriptRoot\dreddor_root_cert.cert" `
+    $cert = Import-Certificate -Filepath "$PSScriptRoot\dreddor_code_signing.cert" `
       -CertStoreLocation cert:\LocalMachine\Root
+    Import-Certificate -FilePath "$PSScriptRoot\dreddor_code_signing.cert" `
+      -Cert Cert:\CurrentUser\TrustedPublisher
 }
 
 Function SetupProfile() {
@@ -37,14 +39,41 @@ Function SetupWinRMForAnsible() {
     powershell.exe -ExecutionPolicy ByPass -File $file
 }
 
+Function InstallDistro {
+    Param ([string] $distname, [string] $disturl)
+    if (-NOT (Test-Path $HOME\WSL\archives\$distname.zip) ) {
+        Write-Host "Downloading $distname WSL image from $disturl..."
+        Invoke-WebRequest -Uri $disturl -Outfile $HOME\WSL\archives\$distname.zip -UseBasicParsing
+        if (-NOT (Test-Path $HOME\WSL\$distname) ) {
+            Write-Host "Extracting $distname WSL image..."
+            Expand-Archive -DestinationPath $HOME\WSL\$distname `
+                $HOME\WSL\archives\$distname.zip
+        }
+    }
+}
+
 Function SetupWSL() {
-    return
+    if (-NOT (Test-Path $HOME\WSL) ) {
+        mkdir $HOME\WSL
+    }
+    if (-NOT (TEST-Path $HOME\WSL\archives)) {
+        mkdir $HOME\WSL\archives
+    }
+
+    # Enable the WSL Feature - this will prompt for reboot if it is not already enabled
+    Write-Host "Enabling WSL. If this is not already enabled, it will prompt for reboot..."
+    Write-Host "  Note: If prompted for reboot, re-run setup again after restart"
+    Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+    #
+    # Download the WSL ubuntu image if it does not already exist
+    InstallDistro -distname "ubuntu-1804" -disturl "https://aka.ms/wsl-ubuntu-1804"
 }
 
 Function Main() {
     ImportSelfSigningCert
     SetupProfile
     SetupWinRMForAnsible
+    SetupWSL
 }
 
 Main
@@ -52,33 +81,33 @@ Main
 # SIG # Begin signature block
 # MIIFrAYJKoZIhvcNAQcCoIIFnTCCBZkCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUBoZeOZiq7/Bx4T3zi52TwRvP
-# 3qagggMyMIIDLjCCAhagAwIBAgIQUe8ypRuUealJXJm8+dJzJzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUm3haANWrHvmHcUtYw5TvbWNM
+# aFGgggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
 # AQsFADAvMS0wKwYDVQQDDCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlm
-# aWNhdGUwHhcNMTkwMTEyMDAzNzE4WhcNMjAwMTEyMDA1NzE4WjAvMS0wKwYDVQQD
+# aWNhdGUwHhcNMTkwMTEyMjE0MDM4WhcNMjAwMTEyMjIwMDM4WjAvMS0wKwYDVQQD
 # DCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlmaWNhdGUwggEiMA0GCSqG
-# SIb3DQEBAQUAA4IBDwAwggEKAoIBAQDVEnm5noUHsMfzjYui1VTMWGBEtqH4h1C8
-# /x6adxhhbfh2dBGgb/e3ivNzChLyWc7xOxhEquGMa1GP7rm+nS9fLa6vCN+n/gUe
-# nCRDQLl2j3ajgTzdknEYt2K9DXS9/uaf6DSp+7uhrHzHqTDMBlRYkYpAbg/giw9f
-# 2e06JsERdIlWfHsp2BXsM7ZNwX83P2c0RPn5Qi3nEC5jEjf7gqeMe/nT4nXwotHc
-# ibJxRt5Q5Rhg0JdNRHBYXyMLPO3ptQnuPcu2fSXHNsmwVgOqBALLJswXC2tmk2GE
-# LyQn1gq/BQq7NSAi0QcS7kmpmSC6gl6CgTlPHcnqoxBGglSrpQ+ZAgMBAAGjRjBE
+# SIb3DQEBAQUAA4IBDwAwggEKAoIBAQC/KqVr9b6yQcnTsZE6fFX0cVAikPMHiCe6
+# hhmOjhPzr9XU+mGa/na46065i4mTduDH1v9qrG1GzI2NSs7yK8ygmo0GSfADwsgl
+# AVK8MXKriO2wLtYBsV9qQMEJrXfB5fJthyEDiGn2+y0AlzYKTSEM/h03NS1WjfTl
+# CE+nfprEP1x9IGP9tq/QA9KpSs14LtJ6JZTG9DrZV1OwkLxX9+xvMamiaGCmDzhR
+# 8Fd9Pa6SzJMREZ13jcGGehzSYHd2M5pygVU73cA6h3ANBydQRROqTEwGMjuRM5QN
+# zLjBXAiJJlqOS9Iq6LgHnVpZpSXAnH3j05f9ekFUbhWBS+JnKb9lAgMBAAGjRjBE
 # MA4GA1UdDwEB/wQEAwIHgDATBgNVHSUEDDAKBggrBgEFBQcDAzAdBgNVHQ4EFgQU
-# 9MC4JkXMl+niSEfkBFdi/qkTtaEwDQYJKoZIhvcNAQELBQADggEBAIO2Vx2RI3Pg
-# nHTRlXapltJ/CnetoxD/m3tHom0zHBAJobm1Z+NdSzkmK+vkLK/1PlrCApj8a/BA
-# DLXQYNh4YvzZB3ToDEOVbBeCw/8KY5nL36vDD31vm+TE8XawqfprHUQunR6Q0HMM
-# ZFUioBOEKnyWLnbNR3gclkYytgY5xiLrrhxHej0ZxG1AD8BE5B1D1aX786pCwNvd
-# W5MeprY0lsTKdfuxnTed3MnFLW6SknpfLJVQWG+1/7uxLT54RVgrJuQyYJ8KIPsH
-# z7CuWUzA7jTg4T1jYB5nu0sqEPAu8YnJhfl3j+1w7S8yTJHuCS07cGmtx1MW9ZQG
-# nGCQiXl9/8ExggHkMIIB4AIBATBDMC8xLTArBgNVBAMMJERyZWRkb3IgU2VsZi1T
-# aWduZWQgQ29kZSBDZXJ0aWZpY2F0ZQIQUe8ypRuUealJXJm8+dJzJzAJBgUrDgMC
+# jWREIhYt99lRzTZ8gMxgBb+YylEwDQYJKoZIhvcNAQELBQADggEBABjfbDLjkY3c
+# Rxl5eoh8j6STEcEw2CqKALfu1YZJNZZSQ2hlCLq5KhoFCgKoEasJOqd7CkFBG8nM
+# QoVaj+Un4sfO6zhaqcZZEDTqbktm01sgM+PsQiXkOP2HRfPRYVlmgcrFDwU8gEMP
+# HcfZnnaE28rRq4kv2Lhd7UY6pKlmx/Nsq/5LjMaCK2xlSzbdhjmDJbiBPKWuyLAM
+# QuVyGdn3HuiLdSLNRBAEk0CWwBjeOqgfRs6/CCoTPTuEDQpzVTDwteBYCXtESS9f
+# wsWaNsE7sJRPgH1r1Vw+qiaLRHz1YRnWVWsDe/GBsCsWJFKkQAQU4qiscECjM+Qn
+# AsrVKP0ToekxggHkMIIB4AIBATBDMC8xLTArBgNVBAMMJERyZWRkb3IgU2VsZi1T
+# aWduZWQgQ29kZSBDZXJ0aWZpY2F0ZQIQdDJnWpUt9L9J1E+xJuLlkzAJBgUrDgMC
 # GgUAoHgwGAYKKwYBBAGCNwIBDDEKMAigAoAAoQKAADAZBgkqhkiG9w0BCQMxDAYK
 # KwYBBAGCNwIBBDAcBgorBgEEAYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAjBgkqhkiG
-# 9w0BCQQxFgQUDI1SbTilefxIlqWee1eJvYfvImswDQYJKoZIhvcNAQEBBQAEggEA
-# ZdVlfFu3RvGGWi7X9jMNbTH1vBvC16RR8AiNDFZ57OoclZvr9iNhz40Z4A5rTNEE
-# TXGGeewAUroCbiOlb6JDzvhisHFQUvqjD/pxxniq6KTysNWVMczERvcrgiNSacFJ
-# tTwqDrL40+KpSBosnefq5JfkNyp8P0rYNRtVgzyPzvGtG2qapZq/dVOpYPlBjg5U
-# c0W/l7WBM+p69RUDv9JZp/q8DlUjdf04T8fm0/5Zv37CiQXGRsuxxO86uoJ1mB7X
-# mT2RKZ5jb8RBvoWY1aGW9QGfZu2YigZvngyMzkbFn1yvOPXB9XaHoBREkQK7+H+v
-# +CGfMoewUmjEO23tKAOVSg==
+# 9w0BCQQxFgQUXosRrKNGOPLksQESU5ZMi8PrFF4wDQYJKoZIhvcNAQEBBQAEggEA
+# Tqtxvpv06jBi5SCIBZWK98sDDC5P03WarrpXm9UEYefi3d7N6cGjKvYHxgNYqeX/
+# IsVlLf91lR77ITrk1bXe8W1NAyKcqiDPMWdz7hEUdUQw7WTmz/2dnCJhbXSY2tVQ
+# wi3ePDZZqiMh9B/xifPNTvRvXm5rig5CwPyts+JxEJ8QYq5DXN1Z/j4uwSmcjINS
+# +ezZzx5uLZo88pVSakva0NDzgcWB34TQtfnOTGEYRw2Y7QCyUztzfZ4Ac9shmGP/
+# Ho3Ip8IwurVKGR9BBK15TDkLnwkCFCUNr571PXmEV8XL+IAJ1/k4BI+6CCJBqWyB
+# uX/ZL2aC5vI9a/d4O8fePQ==
 # SIG # End signature block

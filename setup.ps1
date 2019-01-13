@@ -1,5 +1,5 @@
 # Import the certificate that signed all these scripts
-Function ImportSelfSigningCert() {
+Function ImportSelfSigningCert {
     Write-Host "PSScriptRoot: $PSScriptRoot"
     $cert = Import-Certificate -Filepath "$PSScriptRoot\dreddor_code_signing.cert" `
       -CertStoreLocation cert:\LocalMachine\Root
@@ -7,7 +7,7 @@ Function ImportSelfSigningCert() {
       -Cert Cert:\CurrentUser\TrustedPublisher
 }
 
-Function SetupProfile() {
+Function SetupProfile {
 
     $write_profile = $TRUE
 
@@ -30,7 +30,7 @@ Function SetupProfile() {
     }
 }
 
-Function SetupWinRMForAnsible() {
+Function SetupWinRMForAnsible {
     $url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
     $file = "$env:temp\ConfigureRemotingForAnsible.ps1"
 
@@ -51,12 +51,12 @@ Function InstallDistro {
             $HOME\WSL\archives\$distname.zip
 
         Start-Process -FilePath $HOME\WSL\$distname\$distname.exe `
-          -ArgumentList install `
+          -ArgumentList ['install', '--root'] `
           -NoNewWindow -Wait
     }
 }
 
-Function SetupWSL() {
+Function SetupWSL {
     if (-NOT (Test-Path $HOME\WSL) ) {
         mkdir $HOME\WSL
     }
@@ -73,7 +73,7 @@ Function SetupWSL() {
     InstallDistro -distname "ubuntu1804" -disturl "https://aka.ms/wsl-ubuntu-1804"
 }
 
-Function Main() {
+Function Main {
     ImportSelfSigningCert
     SetupProfile
     SetupWinRMForAnsible
@@ -85,8 +85,8 @@ Main
 # SIG # Begin signature block
 # MIIFrAYJKoZIhvcNAQcCoIIFnTCCBZkCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUEnhfHVmS+u41QhjylN2lfd3Y
-# rzqgggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUw48MPXTexapgR0Ny1kLL+6HF
+# fn6gggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
 # AQsFADAvMS0wKwYDVQQDDCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlm
 # aWNhdGUwHhcNMTkwMTEyMjE0MDM4WhcNMjAwMTEyMjIwMDM4WjAvMS0wKwYDVQQD
 # DCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlmaWNhdGUwggEiMA0GCSqG
@@ -107,11 +107,11 @@ Main
 # aWduZWQgQ29kZSBDZXJ0aWZpY2F0ZQIQdDJnWpUt9L9J1E+xJuLlkzAJBgUrDgMC
 # GgUAoHgwGAYKKwYBBAGCNwIBDDEKMAigAoAAoQKAADAZBgkqhkiG9w0BCQMxDAYK
 # KwYBBAGCNwIBBDAcBgorBgEEAYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAjBgkqhkiG
-# 9w0BCQQxFgQUGHZXXUlNh0nMhBDPYfgx32CwkggwDQYJKoZIhvcNAQEBBQAEggEA
-# hSAyJwhQd9NKfasTU7b7zWtwax6kNeeCzafheW+vT0M3GuF+IagI+flRaISAwJfR
-# iNvBCIX3YlHudUUt/KFifNTcS0n+38XPgcIlK7J87bcvISPDnPRKxF6vdWd5AHc5
-# 5xHldUp3WVgTaBOXIVRO9P/vOq6PFF5kEgDDdKIctDqBUIJ2nVskyFrpX8ufHEYQ
-# XPHmZNGdwfcUCe37y0DPQ2E5bFZ+JhoyRuQRi8j6nhfNCrSLpBwNg6bHt0WMV/My
-# UH/Fs2TQanPeZE9YQPpSl/e3p0YELFGR5pEeQKviNXNfKbrhgbIK64hvXCznRFhH
-# Njzr2T92F5xjJ6+ufz1gZA==
+# 9w0BCQQxFgQUC+IEezU5ZhGv1Ex+y3a9fWo0AqMwDQYJKoZIhvcNAQEBBQAEggEA
+# RiXNF/5bfW+SfNypzGYBVoCOYMnf7/pUCursNZTZgMjsQRHhplY7qrzqdBurps8c
+# YM7w/YA/gUUXEJNYlFns3msMHueBxdqXrYExTOCnQCNzd0mBq5ZuzaS95iJGDYR8
+# KSFUJE8tBiEckdvRq3sm8cGQNngCxTd94cJLx1FVKMk4ER4ucAwTJfou5K25eUdl
+# LbfpNTSBlcE5xk0mcLe5Cc0HQVSXqU7CwlDMmOf0iw0h/1d+YHjGFD4yQkeTwNyH
+# 4agAOu4G3wx+VJpFJu6U5RwK56vLstAoSRJoqWtjGMICgNUCni7t2+ZmH5FBb0vi
+# gtWZj3nhyPgA50inQJeTAA==
 # SIG # End signature block

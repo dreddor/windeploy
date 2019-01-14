@@ -93,8 +93,12 @@ Function InstallAnsible($distname) {
 }
 
 Function InstallChocolatey {
-    Write-Host "Installing Chocolatey..."
-    iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+    if (Get-Command choco.exe -ErrorAction SilentlyContinue) {
+        Write-Host "Chocolatey already installed. Skipping."
+    } Else {
+        Write-Host "Installing Chocolatey..."
+        iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+    }
 }
 
 Function RunWSLAnsible {
@@ -163,8 +167,8 @@ Main
 # SIG # Begin signature block
 # MIIFrAYJKoZIhvcNAQcCoIIFnTCCBZkCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUdIg4WpQgOz0WK7rvVVEQvDbU
-# D/GgggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUrXYcg+MwM42lxmhT70REKbDj
+# XFCgggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
 # AQsFADAvMS0wKwYDVQQDDCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlm
 # aWNhdGUwHhcNMTkwMTEyMjE0MDM4WhcNMjAwMTEyMjIwMDM4WjAvMS0wKwYDVQQD
 # DCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlmaWNhdGUwggEiMA0GCSqG
@@ -185,11 +189,11 @@ Main
 # aWduZWQgQ29kZSBDZXJ0aWZpY2F0ZQIQdDJnWpUt9L9J1E+xJuLlkzAJBgUrDgMC
 # GgUAoHgwGAYKKwYBBAGCNwIBDDEKMAigAoAAoQKAADAZBgkqhkiG9w0BCQMxDAYK
 # KwYBBAGCNwIBBDAcBgorBgEEAYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAjBgkqhkiG
-# 9w0BCQQxFgQUbSOdn44lDxkz4CWzBrMesAFYQnowDQYJKoZIhvcNAQEBBQAEggEA
-# boALvWYeRdLmamR/8t8JBAmyhAx7RcC9zCbgD459G2MnQ6TIrUR88l5lksssDtoW
-# fo3nmn/KpynddeUzIqEBjLGt5uWVU0UWiMxauMReTapnsWRUJdS6ZGlCj/LAjWRJ
-# xfG4xDHqsMQinrTrduHrVzPPAMPBd0pMkwa762IY17THNslwLmP7dGUcXCVMInDl
-# W4ebgV9yOWgtxbP28V5ZvVUX64vk/dFIqKzpwThyJaDbRvyo5AjgEBEik+hafQ9w
-# w7dT9aOAi95C9IEw9ipk74ohgTtKya3iGBKDY/fKYweTqgo8ZSompXvjlseXGPza
-# wVDytvQqh1hzu7pV7JQAhA==
+# 9w0BCQQxFgQULsXtuCORDZ5hSY/wO1hgV0T4rMcwDQYJKoZIhvcNAQEBBQAEggEA
+# oqWSKICX0agVpxN70CfCqeR5vPO0rRWEeJLHgCF8hWtdf0ag/8tu5oYQblhuXI3f
+# dBAAi0VwZY/Zks0yQmlulXEhWP1hF6erxnMB6jPewVLeiA02DscOcNco/kQ+Gvel
+# uz6Z8YrqQkTV0w/XVYZpp1t+hdpQ2H6ftUNHGSPcoxtjX+/FaYxLtHZ1aHEF6ddV
+# YQeodDLlUWHEELTLycei5n6Kezg6+z6smKFxid2x9S5FQNipGkd/nWNeL0/A5ZzZ
+# ZHh1u4vjDSAqPotgiPQiFkUXgB675jjkjBgOPAZJndg4z7rYX83epiGW/tpDutug
+# BwWyttFC2/Sk+Fa4SLF7Rg==
 # SIG # End signature block

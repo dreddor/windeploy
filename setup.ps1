@@ -93,6 +93,11 @@ Function InstallChocolatey {
 
 Function RunWSLAnsible {
     bash -c "ansible-playbook /mnt/c/Users/dreddor/deployments/windeploy/ansible/user_wsl.yaml"
+    # Work around windows bug:
+    #   https://stackoverflow.com/questions/4742992/cannot-access-network-drive-in-powershell-running-as-administrator
+    #   https://support.microsoft.com/en-us/help/937624/programs-may-be-unable-to-access-some-network-locations-after-you-turn
+    net use Z: \\10.10.0.150\PRIVATE /persistent:no
+    bash -c "ansible-playbook /mnt/c/Users/dreddor/deployments/windeploy/ansible/environment_wsl.yaml"
 }
 
 Function Main {

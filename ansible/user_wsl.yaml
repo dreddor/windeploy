@@ -39,4 +39,19 @@
       group: dreddor
       mode: 0600
     
-    
+  - name: Create the deployments directory
+    file:
+      path: /home/dreddor/deployments
+      state: directory
+      owner: dreddor
+      group: dreddor
+      mode: 0775
+
+  - name: Create a link to credstore
+    file:
+      src: /mnt/z/credstore
+      dest: /home/dreddor/deployments/credstore
+      owner: dreddor
+      group: dreddor
+      state: link
+      force: yes

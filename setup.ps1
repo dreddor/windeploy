@@ -41,6 +41,9 @@ Function SetupWinRMForAnsible {
 
 Function InstallDistro {
     Param ([string] $distname, [string] $disturl)
+
+    $ExecPath =  "$HOME\WSL\$distname\$distname.exe"
+
     if (-NOT (Test-Path $HOME\WSL\archives\$distname.zip) ) {
         Write-Host "Downloading $distname WSL image from $disturl..."
         Invoke-WebRequest -Uri $disturl -Outfile $HOME\WSL\archives\$distname.zip -UseBasicParsing
@@ -50,16 +53,19 @@ Function InstallDistro {
         Expand-Archive -DestinationPath $HOME\WSL\$distname `
             $HOME\WSL\archives\$distname.zip
 
-        Start-Process -FilePath $HOME\WSL\$distname\$distname.exe `
+        Start-Process -FilePath $ExecPath `
           -ArgumentList install,--root `
           -NoNewWindow -Wait
+
+        SetTaskbarPin $ExecPath
 
         InstallAnsible($distname)
     }
     RunWSLAnsible
-    Start-Process -FilePath $HOME\WSL\$distname\$distname.exe `
+    Start-Process -FilePath $ExecPath `
       -ArgumentList config,--default-user,dreddor `
       -NoNewWindow -Wait
+
 }
 
 Function SetupWSL {
@@ -100,6 +106,50 @@ Function RunWSLAnsible {
     bash -c "ansible-playbook /mnt/c/Users/dreddor/deployments/windeploy/ansible/environment_wsl.yaml"
 }
 
+# This makes use of a function in shell32.dll by doing some magic
+# to read the location of the function out of the registry, and then
+# executing it with InvokeVerb()
+#
+# Found here:
+#   https://stackoverflow.com/questions/31720595/pin-program-to-taskbar-using-ps-in-windows-10
+Function SetTaskbarPin {
+    param (
+        [parameter(Mandatory=$True, HelpMessage="Target item to pin")]
+        [ValidateNotNullOrEmpty()]
+        [string] $Target
+    )
+    if (!(Test-Path $Target)) {
+        Write-Warning "$Target does not exist"
+        break
+    }
+
+    $KeyPath1  = "HKCU:\SOFTWARE\Classes"
+    $KeyPath2  = "*"
+    $KeyPath3  = "shell"
+    $KeyPath4  = "{:}"
+    $ValueName = "ExplorerCommandHandler"
+    $ValueData =
+        (Get-ItemProperty `
+            ("HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\" + `
+                "CommandStore\shell\Windows.taskbarpin")
+        ).ExplorerCommandHandler
+
+    $Key2 = (Get-Item $KeyPath1).OpenSubKey($KeyPath2, $true)
+    $Key3 = $Key2.CreateSubKey($KeyPath3, $true)
+    $Key4 = $Key3.CreateSubKey($KeyPath4, $true)
+    $Key4.SetValue($ValueName, $ValueData)
+
+    $Shell = New-Object -ComObject "Shell.Application"
+    $Folder = $Shell.Namespace((Get-Item $Target).DirectoryName)
+    $Item = $Folder.ParseName((Get-Item $Target).Name)
+    $Item.InvokeVerb("{:}")
+
+    $Key3.DeleteSubKey($KeyPath4)
+    if ($Key3.SubKeyCount -eq 0 -and $Key3.ValueCount -eq 0) {
+        $Key2.DeleteSubKey($KeyPath3)
+    }
+}
+
 Function Main {
     ImportSelfSigningCert
     SetupProfile
@@ -113,8 +163,8 @@ Main
 # SIG # Begin signature block
 # MIIFrAYJKoZIhvcNAQcCoIIFnTCCBZkCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUw48MPXTexapgR0Ny1kLL+6HF
-# fn6gggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUdIg4WpQgOz0WK7rvVVEQvDbU
+# D/GgggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
 # AQsFADAvMS0wKwYDVQQDDCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlm
 # aWNhdGUwHhcNMTkwMTEyMjE0MDM4WhcNMjAwMTEyMjIwMDM4WjAvMS0wKwYDVQQD
 # DCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlmaWNhdGUwggEiMA0GCSqG
@@ -135,11 +185,11 @@ Main
 # aWduZWQgQ29kZSBDZXJ0aWZpY2F0ZQIQdDJnWpUt9L9J1E+xJuLlkzAJBgUrDgMC
 # GgUAoHgwGAYKKwYBBAGCNwIBDDEKMAigAoAAoQKAADAZBgkqhkiG9w0BCQMxDAYK
 # KwYBBAGCNwIBBDAcBgorBgEEAYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAjBgkqhkiG
-# 9w0BCQQxFgQUC+IEezU5ZhGv1Ex+y3a9fWo0AqMwDQYJKoZIhvcNAQEBBQAEggEA
-# RiXNF/5bfW+SfNypzGYBVoCOYMnf7/pUCursNZTZgMjsQRHhplY7qrzqdBurps8c
-# YM7w/YA/gUUXEJNYlFns3msMHueBxdqXrYExTOCnQCNzd0mBq5ZuzaS95iJGDYR8
-# KSFUJE8tBiEckdvRq3sm8cGQNngCxTd94cJLx1FVKMk4ER4ucAwTJfou5K25eUdl
-# LbfpNTSBlcE5xk0mcLe5Cc0HQVSXqU7CwlDMmOf0iw0h/1d+YHjGFD4yQkeTwNyH
-# 4agAOu4G3wx+VJpFJu6U5RwK56vLstAoSRJoqWtjGMICgNUCni7t2+ZmH5FBb0vi
-# gtWZj3nhyPgA50inQJeTAA==
+# 9w0BCQQxFgQUbSOdn44lDxkz4CWzBrMesAFYQnowDQYJKoZIhvcNAQEBBQAEggEA
+# boALvWYeRdLmamR/8t8JBAmyhAx7RcC9zCbgD459G2MnQ6TIrUR88l5lksssDtoW
+# fo3nmn/KpynddeUzIqEBjLGt5uWVU0UWiMxauMReTapnsWRUJdS6ZGlCj/LAjWRJ
+# xfG4xDHqsMQinrTrduHrVzPPAMPBd0pMkwa762IY17THNslwLmP7dGUcXCVMInDl
+# W4ebgV9yOWgtxbP28V5ZvVUX64vk/dFIqKzpwThyJaDbRvyo5AjgEBEik+hafQ9w
+# w7dT9aOAi95C9IEw9ipk74ohgTtKya3iGBKDY/fKYweTqgo8ZSompXvjlseXGPza
+# wVDytvQqh1hzu7pV7JQAhA==
 # SIG # End signature block

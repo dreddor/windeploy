@@ -23,20 +23,20 @@
       password: $6$HXvgnNcq9W/jEMsj$JvJy7zb5eOIBFkDkQS1S3UmPTwoWjzbBynSTlBBJ3ADq3Ltb.qJUKjLpBIYB2ftrGhAfWnuZyAN8uxxPHgxBK0
       groups: wheel,admin
 
-  - name: example copying file with owner and permissions
-    copy:
-      src: /mnt/c/Users/dreddor/deployments/windeploy/ansible/ssh/id_rsa
-      dest: /home/dreddor/.ssh/id_rsa
-      owner: dreddor
-      group: dreddor
-      mode: 0600
-  
-  - name: Set up authorized keys for the deployer user
+  - name: Set up authorized keys for dreddor
     authorized_key: 
       user: dreddor 
       state: present
       key: "{{item}}"
     with_file:
       - /mnt/c/Users/dreddor/deployments/windeploy/ansible/ssh/id_rsa.pub
+
+  - name: Install id_rsa for dreddor
+    copy:
+      src: /mnt/c/Users/dreddor/deployments/windeploy/ansible/ssh/id_rsa
+      dest: /home/dreddor/.ssh/id_rsa
+      owner: dreddor
+      group: dreddor
+      mode: 0600
     
     

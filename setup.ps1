@@ -53,7 +53,13 @@ Function InstallDistro {
         Start-Process -FilePath $HOME\WSL\$distname\$distname.exe `
           -ArgumentList install,--root `
           -NoNewWindow -Wait
+
+        InstallAnsible($distname)
     }
+    RunWSLAnsible
+    Start-Process -FilePath $HOME\WSL\$distname\$distname.exe `
+      -ArgumentList config,--default-user,dreddor `
+      -NoNewWindow -Wait
 }
 
 Function SetupWSL {
@@ -73,14 +79,20 @@ Function SetupWSL {
     InstallDistro -distname "ubuntu1804" -disturl "https://aka.ms/wsl-ubuntu-1804"
 }
 
-Function InstallAnsible {
-    bash -c "apt-get update && sudo apt-get install python-pip git libffi-dev libssl-dev -y"
-    bash -c "pip install ansible pywinrm"
+Function InstallAnsible($distname) {
+    if ($distname -eq "ubuntu1804") {
+        bash -c "apt-get update && sudo apt-get install python-pip git libffi-dev libssl-dev -y"
+        bash -c "pip install ansible pywinrm"
+    }
 }
 
 Function InstallChocolatey {
     Write-Host "Installing Chocolatey..."
     iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+}
+
+Function RunWSLAnsible {
+    bash -c "ansible-playbook /mnt/c/Users/dreddor/deployments/windeploy/ansible/user_wsl.yaml"
 }
 
 Function Main {
@@ -89,7 +101,6 @@ Function Main {
     InstallChocolatey
     SetupWinRMForAnsible
     SetupWSL
-    InstallAnsible
 }
 
 Main

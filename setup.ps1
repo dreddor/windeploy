@@ -109,7 +109,10 @@ Function SetupWSL {
     Write-Host "Enabling WSL. If this is not already enabled, it will prompt for reboot..."
     Write-Host "  Note: If prompted for reboot, re-run setup again after restart"
     Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
-    #
+
+    # Set an exclusion path for windows defender on this on WSL
+    Add-MpPreference -ExclusionPath $HOME\WSL
+
     # Download the WSL ubuntu image if it does not already exist
     InstallDistro -distname "ubuntu1804" -disturl "https://aka.ms/wsl-ubuntu-1804"
 }
@@ -205,8 +208,8 @@ Main
 # SIG # Begin signature block
 # MIIFrAYJKoZIhvcNAQcCoIIFnTCCBZkCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUl5bzoD3FMgGATbffBfdG7LJa
-# U6SgggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUmc4qtC22LsdHPZZfg6BGDpSu
+# xoWgggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
 # AQsFADAvMS0wKwYDVQQDDCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlm
 # aWNhdGUwHhcNMTkwMTEyMjE0MDM4WhcNMjAwMTEyMjIwMDM4WjAvMS0wKwYDVQQD
 # DCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlmaWNhdGUwggEiMA0GCSqG
@@ -227,11 +230,11 @@ Main
 # aWduZWQgQ29kZSBDZXJ0aWZpY2F0ZQIQdDJnWpUt9L9J1E+xJuLlkzAJBgUrDgMC
 # GgUAoHgwGAYKKwYBBAGCNwIBDDEKMAigAoAAoQKAADAZBgkqhkiG9w0BCQMxDAYK
 # KwYBBAGCNwIBBDAcBgorBgEEAYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAjBgkqhkiG
-# 9w0BCQQxFgQUqzkJ7SoRJ2z/NRChtAjQMfImHwswDQYJKoZIhvcNAQEBBQAEggEA
-# s/RZXQ9tyMIlCH4kjujSWUdwOlhPw6T/V85DA1yxArKt9+2Te/Q/nbnXdhvEeKm1
-# GLtDPWzASURuJgKPEJDqiarE3b30Tole8Y4CT4Xu5CeNYTB9aywHY4LfMMssa0v3
-# 6v8umJZsOIos4lo1/0H4yq/I6lKhR+/8sS5cVIi792Q3M1qdJ+BXA3fdZF5FSJ3r
-# uKz19Vgn0IlRreTJicQ4DPWl1ZY8ZLi27OPkb8PDsZvS2Mr5Xc46phNqmNKePs+7
-# Kidgun7fYAmZTxGBHlXl+q3GVUDPbIoAI2O5RQI1eyX9z8lrVYa+ZbVT4A2QtIx1
-# Mo5oLYl5iKLE9brmBm+R6A==
+# 9w0BCQQxFgQUaOlEnA75bzR5TYFiezlz10Jrc3YwDQYJKoZIhvcNAQEBBQAEggEA
+# SqmLqIQ+f7cvp3sGVZpWV/QODhDmd5mwlotHG0u1SKJny5OaXA27RTPoKVt6Nc1l
+# g8dK8iuEI667Jt+q6OuyZk3l1hjQURQd2gJDRJGhX07V72UvFolmN+asZEICD6SR
+# S0MxugczptxQRZ4Rvgy7ePdvSqum6lgJSdYy2lhc90yYbTgEb+YzAbIWmtzUbDJ9
+# P5r+Nvm0rhLiz/kW5SAOoFP+h6YRiJxQY7SWo/TrX85hVgdAaGiZIl90a9Auf+zw
+# vVClyhG0RPKSkAPc6Ee9gUyqSCC/FlI+DThx0BKPJXt+BpQGvVrFUzaFFE45rXyR
+# mmdQjJbferXo+U+bPeanAw==
 # SIG # End signature block

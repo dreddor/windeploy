@@ -13,6 +13,14 @@ Function ImportSelfSigningCert {
     }
 }
 
+Function DisableRealTimeProtection {
+    Set-MpPreference -DisableRealtimeMonitoring $true
+}
+
+Function EnableRealTimeProtection {
+    Set-MpPreference -DisableRealtimeMonitoring $false
+}
+
 Function SetupProfile {
 
     $write_profile = $TRUE
@@ -183,10 +191,12 @@ Function SetTaskbarPin {
 
 Function Main {
     ImportSelfSigningCert
+    DisableRealtimeProtection
     SetupProfile
     InstallChocolatey
     SetupWinRMForAnsible
     SetupWSL
+    EnableRealTimeProtection
 }
 
 Main

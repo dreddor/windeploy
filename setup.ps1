@@ -141,9 +141,9 @@ Function RunWSLAnsibleInitPlaybook {
 
 Function RunAnsibleLinux {
     bash -c "ssh-keyscan -H dreddor.net >> ~/.ssh/known_hosts"
-    bash -c "[ -d /home/dreddor/deployments/envsetup ] || git clone dreddor@dreddor.net:build/envsetup /home/dreddor/deployments/envsetup"
-    bash -c "ansible-playbook /home/dreddor/deployments/envsetup/ansible/common/*.yaml"
-    #bash -c "ansible-playbook /home/dreddor/deployments/envsetup/ansible/linux/*.yaml"
+    bash -c "[ -d ~/deployments/envsetup ] || git clone dreddor@dreddor.net:build/envsetup ~/deployments/envsetup"
+    bash -c "ansible-playbook ~/deployments/envsetup/ansible/common/*.yaml"
+    #bash -c "ansible-playbook ~/deployments/envsetup/ansible/linux/*.yaml"
 }
 
 # This makes use of a function in shell32.dll by doing some magic
@@ -205,8 +205,8 @@ Main
 # SIG # Begin signature block
 # MIIFrAYJKoZIhvcNAQcCoIIFnTCCBZkCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUsUeYisOTj4e/h9CP2tx7Z4BV
-# HlWgggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU5lG/H7CC6NXXyIw8qxakXW12
+# 1bagggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
 # AQsFADAvMS0wKwYDVQQDDCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlm
 # aWNhdGUwHhcNMTkwMTEyMjE0MDM4WhcNMjAwMTEyMjIwMDM4WjAvMS0wKwYDVQQD
 # DCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlmaWNhdGUwggEiMA0GCSqG
@@ -227,11 +227,11 @@ Main
 # aWduZWQgQ29kZSBDZXJ0aWZpY2F0ZQIQdDJnWpUt9L9J1E+xJuLlkzAJBgUrDgMC
 # GgUAoHgwGAYKKwYBBAGCNwIBDDEKMAigAoAAoQKAADAZBgkqhkiG9w0BCQMxDAYK
 # KwYBBAGCNwIBBDAcBgorBgEEAYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAjBgkqhkiG
-# 9w0BCQQxFgQUq4ZhiNOHvBNHFhnjhKgA36t8sUQwDQYJKoZIhvcNAQEBBQAEggEA
-# imxEX+f/3bqrkEUuCEqQltP780Zc2CJF3Y5vxCmvLtk0qBsSHOE1D+R6OXGa06ti
-# DpCNkQnDkU4ghWxchKEsSSYrojS/wjKQk+7xhM6y/BJeaP2ls1v1LNCJbiewCKfc
-# DhFK3XY6WyrQcWuBr+ixQDJNTdumHCWrprPtAReJ4ppft+SjefueaRRaYBaQ2RrN
-# /NsJahFNqfyCJRy2zz1mZ/hDnP/oWrwvqLUpMmxIJrQ4QfzZwosYvsw2hgiExiCz
-# k0lQPruhaKXH1XIa3j9b8IfU+uoMqjmHHc9ubtAUdG4hqcm37BMwBtwQj7Dnx4gB
-# Yumk2pSv71/UWl2Luo9cTg==
+# 9w0BCQQxFgQUDhjFsfR8ovSgLI4tK1UbAu7geCEwDQYJKoZIhvcNAQEBBQAEggEA
+# iPqlQ6uZBYq2LVPX9sm5XlAZeuZy++w2zgAbF/fS9nbKIfo+Bq5aEqwFpvGl8kn6
+# IBtpt3ecbObRJT/7JF2VgHF/Unm1MNSNNuNaeAPCb+MTzl8sT3ZN/PEH62eqSY4l
+# hY2u8hownmi/3E1M55uvUhnJp8k2jp2fC77LZdQ1ZfDxMVSLV9GApVhjdV67gIkx
+# s4Tt7nNp1JaDcrF6F7Lgd97oIc069Clb/Vlf+f0Br3/sSZAJ36Y9Za4cfEWAw6sb
+# ZRSCuVpLJAel8cK6ZW+BCHna3OzR7d/y7EEtBjhlEBHfisdQIkqlyh6qIuRA8b5n
+# F4rJXlE6IdtwhYYlI4eCKQ==
 # SIG # End signature block

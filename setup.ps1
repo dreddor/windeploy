@@ -141,7 +141,7 @@ Function RunWSLAnsibleInitPlaybook {
 
 Function RunAnsibleLinux {
     bash -c "ssh-keyscan -H dreddor.net >> ~/.ssh/known_hosts"
-    bash -c "git clone dreddor@dreddor.net:build/envsetup /home/dreddor/deployments/envsetup"
+    bash -c "[ -d /home/dreddor/deployments/envsetup ] || git clone dreddor@dreddor.net:build/envsetup /home/dreddor/deployments/envsetup"
     bash -c "ansible-playbook /home/dreddor/deployments/envsetup/ansible/common/*.yaml"
     #bash -c "ansible-playbook /home/dreddor/deployments/envsetup/ansible/linux/*.yaml"
 }
@@ -205,8 +205,8 @@ Main
 # SIG # Begin signature block
 # MIIFrAYJKoZIhvcNAQcCoIIFnTCCBZkCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUYtOCilS4opl+vNNuZbZtL3Ze
-# RGqgggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUsUeYisOTj4e/h9CP2tx7Z4BV
+# HlWgggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
 # AQsFADAvMS0wKwYDVQQDDCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlm
 # aWNhdGUwHhcNMTkwMTEyMjE0MDM4WhcNMjAwMTEyMjIwMDM4WjAvMS0wKwYDVQQD
 # DCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlmaWNhdGUwggEiMA0GCSqG
@@ -227,11 +227,11 @@ Main
 # aWduZWQgQ29kZSBDZXJ0aWZpY2F0ZQIQdDJnWpUt9L9J1E+xJuLlkzAJBgUrDgMC
 # GgUAoHgwGAYKKwYBBAGCNwIBDDEKMAigAoAAoQKAADAZBgkqhkiG9w0BCQMxDAYK
 # KwYBBAGCNwIBBDAcBgorBgEEAYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAjBgkqhkiG
-# 9w0BCQQxFgQUCBWBNu5ig3JHpPD6i7BqumXfUiAwDQYJKoZIhvcNAQEBBQAEggEA
-# M7bV0R0QalyJBx1p/chlO+i35+NX34VYCIlEvxtJFTizhOdtsxqLG9tP7ROKwd5U
-# YjkmlMooHHXjYqzZuRNr+FbNWmY2DDHbP77ZkkWcmYiT97HaySVsEE+zoQPiP9GB
-# jVxEPw/FeeEEFgVJgMT03P3l1+LLcsOyWq2Qz3uY4OtWMJeA97voNNKkx/g1WJ/H
-# bSh2IdH5EbcB0pYYijqk9WfJWv71Bf7KOB5dKjROkre66BXoS3S9+BXQ5jAlrQ+6
-# uMOX1B1jhLWYTCSOZsdqc2Atlf5dZ2lNwGGoFZnCPWONMocjgJE9Kuag1hN3uliO
-# cEVDFj6G5quGwVgOdhLP5Q==
+# 9w0BCQQxFgQUq4ZhiNOHvBNHFhnjhKgA36t8sUQwDQYJKoZIhvcNAQEBBQAEggEA
+# imxEX+f/3bqrkEUuCEqQltP780Zc2CJF3Y5vxCmvLtk0qBsSHOE1D+R6OXGa06ti
+# DpCNkQnDkU4ghWxchKEsSSYrojS/wjKQk+7xhM6y/BJeaP2ls1v1LNCJbiewCKfc
+# DhFK3XY6WyrQcWuBr+ixQDJNTdumHCWrprPtAReJ4ppft+SjefueaRRaYBaQ2RrN
+# /NsJahFNqfyCJRy2zz1mZ/hDnP/oWrwvqLUpMmxIJrQ4QfzZwosYvsw2hgiExiCz
+# k0lQPruhaKXH1XIa3j9b8IfU+uoMqjmHHc9ubtAUdG4hqcm37BMwBtwQj7Dnx4gB
+# Yumk2pSv71/UWl2Luo9cTg==
 # SIG # End signature block

@@ -61,10 +61,25 @@ Function InstallDistro {
 
         InstallAnsible($distname)
     }
-    RunWSLAnsible
+    # Initialize users and groups for ansible
+    RunWSLAnsibleInitPlaybook
+
+    # The dreddor user should have been created in the previous step, so set
+    # the default user to 'dreddor'
     Start-Process -FilePath $ExecPath `
       -ArgumentList config,--default-user,dreddor `
-      -NoNewWindow -Wait
+      -NoNewWindow
+
+    # Configure the Windows environment now
+    #   - Install Windows Applications
+    #   - Set up Windows Firewall Rules
+    #   - Set up Z:\ to point to the deadpool PRIVATE share
+    #   - Set the default browser
+    #RunAnsibleWindows
+
+    # Finally, set up the Linux environment to match what I expect everywhere
+    # in my lab and home environments
+    RunAnsibleLinux
 
 }
 
@@ -101,13 +116,19 @@ Function InstallChocolatey {
     }
 }
 
-Function RunWSLAnsible {
+Function RunWSLAnsibleInitPlaybook {
     bash -c "ansible-playbook /mnt/c/Users/dreddor/deployments/windeploy/ansible/user_wsl.yaml"
     # Work around windows bug:
     #   https://stackoverflow.com/questions/4742992/cannot-access-network-drive-in-powershell-running-as-administrator
     #   https://support.microsoft.com/en-us/help/937624/programs-may-be-unable-to-access-some-network-locations-after-you-turn
     net use Z: \\10.10.0.150\PRIVATE /persistent:no
     bash -c "ansible-playbook /mnt/c/Users/dreddor/deployments/windeploy/ansible/environment_wsl.yaml"
+}
+
+Function RunAnsibleLinux {
+    bash -c "git clone dreddor@dreddor.net:build/envsetup /home/dreddor/deployments/envsetup"
+    bash -c "ansible-playbook /home/dreddor/deployments/envsetup/ansible/common/*.yaml"
+    #bash -c "ansible-playbook /home/dreddor/deployments/envsetup/ansible/linux/*.yaml"
 }
 
 # This makes use of a function in shell32.dll by doing some magic
@@ -167,8 +188,8 @@ Main
 # SIG # Begin signature block
 # MIIFrAYJKoZIhvcNAQcCoIIFnTCCBZkCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUrXYcg+MwM42lxmhT70REKbDj
-# XFCgggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUnT9ZcYr0eOD+alvG14za/fD1
+# vWagggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
 # AQsFADAvMS0wKwYDVQQDDCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlm
 # aWNhdGUwHhcNMTkwMTEyMjE0MDM4WhcNMjAwMTEyMjIwMDM4WjAvMS0wKwYDVQQD
 # DCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlmaWNhdGUwggEiMA0GCSqG
@@ -189,11 +210,11 @@ Main
 # aWduZWQgQ29kZSBDZXJ0aWZpY2F0ZQIQdDJnWpUt9L9J1E+xJuLlkzAJBgUrDgMC
 # GgUAoHgwGAYKKwYBBAGCNwIBDDEKMAigAoAAoQKAADAZBgkqhkiG9w0BCQMxDAYK
 # KwYBBAGCNwIBBDAcBgorBgEEAYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAjBgkqhkiG
-# 9w0BCQQxFgQULsXtuCORDZ5hSY/wO1hgV0T4rMcwDQYJKoZIhvcNAQEBBQAEggEA
-# oqWSKICX0agVpxN70CfCqeR5vPO0rRWEeJLHgCF8hWtdf0ag/8tu5oYQblhuXI3f
-# dBAAi0VwZY/Zks0yQmlulXEhWP1hF6erxnMB6jPewVLeiA02DscOcNco/kQ+Gvel
-# uz6Z8YrqQkTV0w/XVYZpp1t+hdpQ2H6ftUNHGSPcoxtjX+/FaYxLtHZ1aHEF6ddV
-# YQeodDLlUWHEELTLycei5n6Kezg6+z6smKFxid2x9S5FQNipGkd/nWNeL0/A5ZzZ
-# ZHh1u4vjDSAqPotgiPQiFkUXgB675jjkjBgOPAZJndg4z7rYX83epiGW/tpDutug
-# BwWyttFC2/Sk+Fa4SLF7Rg==
+# 9w0BCQQxFgQUb2QCbTga+5OhpMf3l7HdKahuDF0wDQYJKoZIhvcNAQEBBQAEggEA
+# HueEigrilXOI6AyZYgA75H3Mkm/2JbxUWQinICRHmshhO5/bosIdT9vJXl35eiOd
+# 7KjT8WjfbgIYTmDotFitF01UpVsolzjsIEYIGZpDTYecrPXqzNNdBUGsnUGrJLEg
+# cR4YlpLZ4tHFzUSdTKaLIN8huWQiAj/wjKiA3N+Ca5RJp6QejnCU6EUKFMAY9B9L
+# C8iSkmWFnRHEjVKguLQh3w6ZxUe7qDbkMD0SEAi2NVcr4up1scVYlnoyITp/paCf
+# X0WQiL3uM3y+jU5j0f1ItAutOjdDAlrEA1G4Hr2TMoSXubviN1owtRLooKwH6T3m
+# 0AWFQBFnfnPGXbGk+G+xsw==
 # SIG # End signature block

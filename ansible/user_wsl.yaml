@@ -45,7 +45,7 @@
       state: directory
       owner: dreddor
       group: dreddor
-      mode: 0775
+      mode: 0755
 
   - name: Create a link to credstore
     file:
@@ -55,3 +55,4 @@
       group: dreddor
       state: link
       force: yes
+      follow: false

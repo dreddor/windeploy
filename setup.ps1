@@ -82,7 +82,7 @@ Function InstallDistro {
     # the default user to 'dreddor'
     Start-Process -FilePath $ExecPath `
       -ArgumentList config,--default-user,dreddor `
-      -NoNewWindow
+      -NoNewWindow -Wait
 
     # Configure the Windows environment now
     #   - Install Windows Applications

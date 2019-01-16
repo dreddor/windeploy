@@ -1,14 +1,15 @@
 # Import the certificate that signed all these scripts
 Function ImportSelfSigningCert {
-    $CertFile = Get-PfxCertificate -FilePath $PSScriptRoot\dreddor_code_signing.cert
+    $CertPath = "$PSScriptRoot\ansible\certificates\dreddor_code_signing.cert"
+    $CertFile = Get-PfxCertificate -FilePath $CertPath
     $Thumbprint = $CertFile.Thumbprint.ToString()
     if(Get-ChildItem Cert:\LocalMachine\Root\$thumbprint -ErrorAction SilentlyContinue) {
         Write-Host "Code Signing Certificate already imported. Skipping"
     } Else {
         Write-Host "Importing Code Signing Certificate..."
-        $cert = Import-Certificate -Filepath "$PSScriptRoot\dreddor_code_signing.cert" `
+        $cert = Import-Certificate -Filepath $CertPath `
           -CertStoreLocation cert:\LocalMachine\Root
-        Import-Certificate -FilePath "$PSScriptRoot\dreddor_code_signing.cert" `
+        Import-Certificate -FilePath  $CertPath `
           -Cert Cert:\CurrentUser\TrustedPublisher
     }
 }

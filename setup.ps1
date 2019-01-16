@@ -14,6 +14,34 @@ Function ImportSelfSigningCert {
     }
 }
 
+Function GenerateWinRMCertificate {
+    # set the name of the local user that will have the key mapped
+    $Username = "$USER"
+    $Output_Path = "$PSScriptRoot\ansible\certificates"
+    if(Test-Path $Output_Path\cert.pfx) {
+        Write-Host "WinRM Certificate already generated. Skipping"
+    } Else {
+        # instead of generating a file, the cert will be added to the personal
+        # LocalComputer folder in the certificate store
+        $cert = New-SelfSignedCertificate -Type Custom `
+            -Subject "CN=$Username" `
+            -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.2","2.5.29.17={text}upn=$Username@localhost") `
+            -KeyUsage DigitalSignature,KeyEncipherment `
+            -KeyAlgorithm RSA `
+            -KeyLength 2048
+
+        # export the public key
+        $pem_output = @()
+        $pem_output += "-----BEGIN CERTIFICATE-----"
+        $pem_output += [System.Convert]::ToBase64String($cert.RawData) -replace ".{64}", "$&`n"
+        $pem_output += "-----END CERTIFICATE-----"
+        [System.IO.File]::WriteAllLines("$Output_Path\cert.pem", $pem_output)
+
+        # export the private key in a PFX file
+        [System.IO.File]::WriteAllBytes("$Output_Path\cert.pfx", $cert.Export("Pfx"))
+    }
+}
+
 Function DisableRealTimeProtection {
     Set-MpPreference -DisableRealtimeMonitoring $true
 }
@@ -200,6 +228,7 @@ Function Main {
     SetupProfile
     InstallChocolatey
     SetupWinRMForAnsible
+    GenerateWinRMCertificate
     SetupWSL
     EnableRealTimeProtection
 }

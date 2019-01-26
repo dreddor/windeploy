@@ -6,19 +6,29 @@ Function ImportSelfSigningCert {
     if(Get-ChildItem Cert:\LocalMachine\Root\$thumbprint -ErrorAction SilentlyContinue) {
         Write-Host "Code Signing Certificate already imported. Skipping"
     } Else {
+        $cert = ''
         Write-Host "Importing Code Signing Certificate..."
         $cert = Import-Certificate -Filepath $CertPath `
           -CertStoreLocation cert:\LocalMachine\Root
-        Import-Certificate -FilePath  $CertPath `
-          -Cert Cert:\CurrentUser\TrustedPublisher
+        if (-Not $cert) {
+            Throw "Could not import certificate to Cert:\LocalMachine\Root"
+        }
+
+        $cert = ''
+        $cert = Import-Certificate -FilePath  $CertPath `
+          -Cert Cert:\LocalMachine\TrustedPublisher
+        if (-Not $cert) {
+            Throw "Could not import certificate to Cert:\LocalMachine\TrustedPublisher"
+        }
     }
 }
 
 Function GenerateWinRMCertificate {
+    Write-Host "Generating WinRM Certificate..."
     # set the name of the local user that will have the key mapped
     $Username = "$USER"
     $Output_Path = "$PSScriptRoot\ansible\certificates"
-    if(Test-Path $Output_Path\cert.pfx) {
+    if(Test-Path $Output_Path\WinRMCert.pfx) {
         Write-Host "WinRM Certificate already generated. Skipping"
     } Else {
         # instead of generating a file, the cert will be added to the personal
@@ -35,10 +45,28 @@ Function GenerateWinRMCertificate {
         $pem_output += "-----BEGIN CERTIFICATE-----"
         $pem_output += [System.Convert]::ToBase64String($cert.RawData) -replace ".{64}", "$&`n"
         $pem_output += "-----END CERTIFICATE-----"
-        [System.IO.File]::WriteAllLines("$Output_Path\cert.pem", $pem_output)
+        [System.IO.File]::WriteAllLines("$Output_Path\WinRMCert.pem", $pem_output)
 
         # export the private key in a PFX file
-        [System.IO.File]::WriteAllBytes("$Output_Path\cert.pfx", $cert.Export("Pfx"))
+        [System.IO.File]::WriteAllBytes("$Output_Path\WinRMCert.pfx", $cert.Export("Pfx"))
+    }
+}
+
+Function ImportWinRMCertificate {
+    $Username = "$USER"
+    $CertificatePath = "$PSScriptRoot\ansible\certificates\WinRMCert.pfx"
+    $WinRMCert = Get-PfxCertificate -FilePath $CertificatePath
+    $Thumbprint = $WinRMCert.Thumbprint.ToString()
+    if (Test-Path Cert:\LocalMachine\Root\$Thumbprint) {
+        Write-Host "WinRM Certificate already imported. Skipping."
+    } Else {
+        $cert = ''
+        Write-Host "Importing WinRM Certificate into the registry..."
+        $cert = Import-PfxCertificate -Filepath $CertificatePath `
+          -CertStoreLocation cert:\LocalMachine\Root
+        if (-Not $cert) {
+            Throw "Could not import certificate to Cert:\LocalMachine\Root"
+        }
     }
 }
 
@@ -229,6 +257,7 @@ Function Main {
     InstallChocolatey
     SetupWinRMForAnsible
     GenerateWinRMCertificate
+    ImportWinRMCertificate
     SetupWSL
     EnableRealTimeProtection
 }

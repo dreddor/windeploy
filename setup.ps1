@@ -174,8 +174,6 @@ Function RunWSLAnsibleInitPlaybook {
 }
 
 Function RunAnsibleLinux {
-    bash -c "ssh-keyscan -H dreddor.net >> ~/.ssh/known_hosts"
-    bash -c "[ -d ~/deployments/envsetup ] || git clone dreddor@dreddor.net:build/envsetup ~/deployments/envsetup"
     bash -c "ansible-playbook ~/deployments/envsetup/ansible/ubuntu1804/*.yaml"
     bash -c "ansible-playbook ~/deployments/envsetup/ansible/common/*.yaml"
 }

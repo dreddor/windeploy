@@ -56,3 +56,12 @@
       state: link
       force: yes
       follow: false
+
+  - name: Cloning envsetup into dreddor/deployments
+    git:
+      repo: 'dreddor@dreddor.net:build/envsetup'
+      dest: "/home/dreddor/deployments/envsetup"
+      remote: origin
+      accept_hostkey: yes
+    become: yes
+    become_user: dreddor

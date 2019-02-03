@@ -26,7 +26,7 @@ Function ImportSelfSigningCert {
 Function GenerateWinRMCertificate {
     Write-Host "Generating WinRM Certificate..."
     # set the name of the local user that will have the key mapped
-    $Username = "$USER"
+    $Username = "$env:UserName"
     $Output_Path = "$PSScriptRoot\ansible\certificates"
     if(Test-Path $Output_Path\WinRMCert.pfx) {
         Write-Host "WinRM Certificate already generated. Skipping"
@@ -34,7 +34,7 @@ Function GenerateWinRMCertificate {
         # instead of generating a file, the cert will be added to the personal
         # LocalComputer folder in the certificate store
         $cert = New-SelfSignedCertificate -Type Custom `
-            -Subject "CN=$Username" `
+            -Subject "CN=$Username WinRM Cert" `
             -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.2","2.5.29.17={text}upn=$Username@localhost") `
             -KeyUsage DigitalSignature,KeyEncipherment `
             -KeyAlgorithm RSA `
@@ -53,19 +53,37 @@ Function GenerateWinRMCertificate {
 }
 
 Function ImportWinRMCertificate {
-    $Username = "$USER"
     $CertificatePath = "$PSScriptRoot\ansible\certificates\WinRMCert.pfx"
-    $WinRMCert = Get-PfxCertificate -FilePath $CertificatePath
-    $Thumbprint = $WinRMCert.Thumbprint.ToString()
-    if (Test-Path Cert:\LocalMachine\Root\$Thumbprint) {
-        Write-Host "WinRM Certificate already imported. Skipping."
+    $PrivateWinRMCert = Get-PfxCertificate -FilePath $CertificatePath
+    $PrivateThumbprint = $PrivateWinRMCert.Thumbprint.ToString()
+
+    # Import Private Key
+    if (Test-Path Cert:\LocalMachine\Root\$PrivateThumbprint) {
+        Write-Host "WinRM Private Certificate already imported. Skipping."
     } Else {
         $cert = ''
-        Write-Host "Importing WinRM Certificate into the registry..."
+        Write-Host "Importing WinRM Private Certificate into the registry..."
         $cert = Import-PfxCertificate -Filepath $CertificatePath `
           -CertStoreLocation cert:\LocalMachine\Root
         if (-Not $cert) {
-            Throw "Could not import certificate to Cert:\LocalMachine\Root"
+            Throw "Could not import private certificate to Cert:\LocalMachine\Root"
+        }
+    }
+
+    # Import Public Key
+    $CertificatePath = "$PSScriptRoot\ansible\certificates\WinRMCert.pem"
+    $PublicWinRMCert = Get-PfxCertificate -FilePath $CertificatePath
+    $PublicThumbprint = $PublicWinRMCert.Thumbprint.ToString()
+
+    if (Test-Path Cert:\LocalMachine\TrustedPeople\$PublicThumbprint) {
+        Write-Host "WinRM Public Certificate already imported. Skipping."
+    } Else {
+        $cert = ''
+        Write-Host "Importing WinRM Public Certificate into the registry..."
+        $cert = Import-Certificate -Filepath $CertificatePath `
+          -CertStoreLocation cert:\LocalMachine\TrustedPeople
+        if (-Not $cert) {
+            Throw "Could not import public certificate to Cert:\LocalMachine\TrustedPeople"
         }
     }
 }

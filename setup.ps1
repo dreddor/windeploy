@@ -172,6 +172,15 @@ Function InstallDistro {
 
 }
 
+Function EnableHyperV {
+    if (Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V | where State -eq "Disabled") {
+        Write-Host "Enabling Hyper-V"
+        Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
+    } Else {
+        Write-Host "HyperV is already enabled. Skipping"
+    }
+}
+
 Function SetupWSL {
     if (-NOT (Test-Path $HOME\WSL) ) {
         mkdir $HOME\WSL
@@ -276,6 +285,7 @@ Function Main {
     SetupWinRMForAnsible
     GenerateWinRMCertificate
     ImportWinRMCertificate
+    EnableHyperV
     SetupWSL
     EnableRealTimeProtection
 }

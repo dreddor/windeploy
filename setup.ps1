@@ -1,6 +1,50 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+Function GetNeededCredentials {
+    $Username = "$env:UserName"
+    try {
+        $Thumbprint = (Get-ChildItem -Path cert:\LocalMachine\root | Where-Object { $_.Subject -eq "CN=$Username WinRM Cert" }).Thumbprint
+    } catch {
+        $Thumbprint = [String]::Empty
+    }
+
+    if (-Not (ClientCert-Installed -Thumbprint $Thumbprint)) {
+        $Password = Read-Host "Enter Password" -AsSecureString
+        $Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $username, $password
+
+        if (-Not (Test-LocalAuth -Credential $Credential).PasswordValid) {
+            Throw "Invalid Credentials"
+        }
+    } else {
+        $Credential = $null
+    }
+
+    return $Credential
+}
+
+Function Test-LocalAuth {
+	param($Credential)
+	Add-Type -AssemblyName System.DirectoryServices.AccountManagement
+	$Obj = New-Object System.DirectoryServices.AccountManagement.PrincipalContext('machine', $env:COMPUTERNAME)
+	$Result = $Obj.ValidateCredentials($Credential.GetNetworkCredential().Username, `
+                                       $Credential.GetNetworkCredential().Password)
+	$Obj | Add-Member NoteProperty "Machine" $env:COMPUTERNAME
+	$Obj | Add-Member NoteProperty "User" $Username
+	$Obj | Add-Member NoteProperty "PasswordValid" $Result
+	return $Obj | Select-Object Machine, User, PasswordValid
+}
+
+Function ClientCert-Installed {
+    param($Thumbprint)
+    $HasClientCert = (ls WSMan:\localhost\ClientCertificate\ | Get-ChildItem | Where-Object { $_.Name -eq "Issuer" }) `
+                        | Where-Object { $_.Value -eq $Thumbprint }
+    if ($HasClientCert) {
+        return $true
+    }
+    return $false
+}
+
 # Import the certificate that signed all these scripts
 Function ImportSelfSigningCert {
     $CertPath = "$PSScriptRoot\ansible\certificates\dreddor_code_signing.cert"
@@ -130,6 +174,26 @@ Function SetupWinRMForAnsible {
 
     powershell.exe -ExecutionPolicy ByPass -File $file
 }
+
+Function EnableWinRMAccess {
+    Param($Credential)
+
+    if ($Credential) {
+        $Username = $Credential.GetNetworkCredential().Username
+        $Thumbprint = (Get-ChildItem -Path cert:\LocalMachine\root `
+                        | Where-Object { $_.Subject -eq "CN=$Username WinRM Cert" }).Thumbprint
+
+        New-Item -Path WSMan:\localhost\ClientCertificate `
+            -Subject "$Username@localhost" `
+            -URI * `
+            -Issuer $Thumbprint `
+            -Credential $Credential `
+            -Force
+    } else {
+        Write-Host "WinRM Access already configured- Skipping"
+    }
+}
+
 
 Function InstallDistro {
     Param ([string] $distname, [string] $disturl)
@@ -299,13 +363,15 @@ Function SetTaskbarPin {
 }
 
 Function Main {
+    $Credential = GetNeededCredentials
     ImportSelfSigningCert
     DisableRealtimeProtection
     SetupProfile
     InstallChocolatey
-    SetupWinRMForAnsible
     GenerateWinRMCertificate
     ImportWinRMCertificate
+    SetupWinRMForAnsible
+    EnableWinRMAccess -Credential $Credential
     EnableHyperV
     SetupWSL
     EnableRealTimeProtection

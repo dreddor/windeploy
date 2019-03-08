@@ -1,3 +1,6 @@
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
 # Import the certificate that signed all these scripts
 Function ImportSelfSigningCert {
     $CertPath = "$PSScriptRoot\ansible\certificates\dreddor_code_signing.cert"
@@ -204,7 +207,13 @@ Function SetupWSL {
 Function InstallAnsible($distname) {
     if ($distname -eq "ubuntu1804") {
         bash -c "apt-get update && sudo apt-get install python-pip git libffi-dev libssl-dev -y"
+        if ($LASTEXITCODE -ne 0) {
+            Throw "Could not install ansible dependencies"
+        }
         bash -c "pip install ansible pywinrm"
+        if ($LASTEXITCODE -ne 0) {
+            Throw "Could not install ansible"
+        }
     }
 }
 
@@ -219,6 +228,9 @@ Function InstallChocolatey {
 
 Function RunWSLAnsibleInitPlaybook {
     bash -c "ansible-playbook /mnt/c/Users/dreddor/deployments/windeploy/ansible/user_wsl.yaml"
+    if ($LASTEXITCODE -ne 0) {
+        Throw "Failed to set up WSL user"
+    }
     # Work around windows bug:
     #   https://stackoverflow.com/questions/4742992/cannot-access-network-drive-in-powershell-running-as-administrator
     #   https://support.microsoft.com/en-us/help/937624/programs-may-be-unable-to-access-some-network-locations-after-you-turn
@@ -226,11 +238,20 @@ Function RunWSLAnsibleInitPlaybook {
         net use Z: \\10.10.0.150\PRIVATE /persistent:no
     }
     bash -c "ansible-playbook /mnt/c/Users/dreddor/deployments/windeploy/ansible/environment_wsl.yaml"
+    if ($LASTEXITCODE -ne 0) {
+        Throw "Failed to set up WSL environment"
+    }
 }
 
 Function RunAnsibleLinux {
     bash -c "ansible-playbook ~/deployments/envsetup/ansible/ubuntu1804/*.yaml"
+    if ($LASTEXITCODE -ne 0) {
+        Throw "Failed to install WSL packages"
+    }
     bash -c "ansible-playbook ~/deployments/envsetup/ansible/common/*.yaml"
+    if ($LASTEXITCODE -ne 0) {
+        Throw "Running Ansible for WSL failed"
+    }
 }
 
 # This makes use of a function in shell32.dll by doing some magic

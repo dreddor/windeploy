@@ -189,9 +189,9 @@ Function EnableWinRMAccess {
             -Issuer $Thumbprint `
             -Credential $Credential `
             -Force
-    } else {
-        Write-Host "WinRM Access already configured- Skipping"
     }
+
+    Set-Item -Path WSMan:\localhost\Service\Auth\Certificate -Value $true
 }
 
 
@@ -231,7 +231,7 @@ Function InstallDistro {
     #   - Set up Windows Firewall Rules
     #   - Set up Z:\ to point to the deadpool PRIVATE share
     #   - Set the default browser
-    #RunAnsibleWindows
+    RunAnsibleWindows
 
     # Finally, set up the Linux environment to match what I expect everywhere
     # in my lab and home environments
@@ -304,6 +304,13 @@ Function RunWSLAnsibleInitPlaybook {
     bash -c "ansible-playbook /mnt/c/Users/dreddor/deployments/windeploy/ansible/environment_wsl.yaml"
     if ($LASTEXITCODE -ne 0) {
         Throw "Failed to set up WSL environment"
+    }
+}
+
+Function RunAnsibleWindows {
+    bash -c "ansible-playbook ~/deployments/envsetup/ansible/windows/*.yaml"
+    if ($LASTEXITCODE -ne 0) {
+        Throw "Failed Windows Ansible Install"
     }
 }
 

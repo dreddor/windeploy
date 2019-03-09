@@ -31,6 +31,59 @@
     with_file:
       - /mnt/c/Users/dreddor/deployments/windeploy/ansible/ssh/id_rsa.pub
 
+  - name: Create the ansible directory
+    file:
+      path: /etc/ansible/
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+
+  - name: Create the ansible certificates directory
+    file:
+      path: /etc/ansible/certificates
+      state: directory
+      owner: root
+      group: wheel
+      mode: 0770
+
+  - name: Install the ansible hosts file
+    copy:
+      src: /mnt/c/Users/dreddor/deployments/windeploy/ansible/ansible_hosts
+      dest: /etc/ansible/hosts
+      owner: root
+      group: wheel
+      mode: 0640
+
+  - name: Install WinRM Public Certificate
+    copy:
+      src: /mnt/c/Users/dreddor/deployments/windeploy/ansible/certificates/WinRMCert.pem
+      dest: /etc/ansible/certificates/WinRMCert.pem
+      owner: root
+      group: wheel
+      mode: 0640
+
+  - name: Install WinRM Private Certificate
+    copy:
+      src: /mnt/c/Users/dreddor/deployments/windeploy/ansible/certificates/WinRMCert.pfx
+      dest: /etc/ansible/certificates/WinRMCert.pfx
+      owner: root
+      group: wheel
+      mode: 0640
+
+  - name: Convert the WinRM Private Certificate
+    command: "openssl pkcs12 -in WinRMCert.pfx -nocerts -nodes -out cert_key.pem -passin pass: -passout pass:"
+    args:
+      chdir: "/etc/ansible/certificates/"
+      creates: "/etc/ansible/certificates/cert_key.pem"
+
+  - name: Set the WinRM Private Certificate permissions
+    file:
+      path: /etc/ansible/certificates/cert_key.pem
+      owner: root
+      group: wheel
+      mode: 0640
+
   - name: Install id_rsa for dreddor
     copy:
       src: /mnt/c/Users/dreddor/deployments/windeploy/ansible/ssh/id_rsa
@@ -38,7 +91,7 @@
       owner: dreddor
       group: dreddor
       mode: 0600
-    
+
   - name: Create the deployments directory
     file:
       path: /home/dreddor/deployments

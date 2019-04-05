@@ -8,6 +8,10 @@ if (Test-Path Cert:\CurrentUser\My\CB1DBD317ED454A83353ADE3938E6249940B5CDB) {
     $cert = (Get-ChildItem Cert:\CurrentUser\My\CB1DBD317ED454A83353ADE3938E6249940B5CDB | get-item)
 }
 
+Function makefast {
+    Set-MpPreference -DisableRealtimeMonitoring $true
+}
+
 # Chocolatey profile
 $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
 if (Test-Path($ChocolateyProfile)) {
@@ -17,8 +21,8 @@ if (Test-Path($ChocolateyProfile)) {
 # SIG # Begin signature block
 # MIIFrAYJKoZIhvcNAQcCoIIFnTCCBZkCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUW5k5YjWjirTxqoZE9KQvAh2l
-# PHegggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUP6GoE9W4hRr0WfPjZknqGv6T
+# VhagggMyMIIDLjCCAhagAwIBAgIQdDJnWpUt9L9J1E+xJuLlkzANBgkqhkiG9w0B
 # AQsFADAvMS0wKwYDVQQDDCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlm
 # aWNhdGUwHhcNMTkwMTEyMjE0MDM4WhcNMjAwMTEyMjIwMDM4WjAvMS0wKwYDVQQD
 # DCREcmVkZG9yIFNlbGYtU2lnbmVkIENvZGUgQ2VydGlmaWNhdGUwggEiMA0GCSqG
@@ -39,11 +43,11 @@ if (Test-Path($ChocolateyProfile)) {
 # aWduZWQgQ29kZSBDZXJ0aWZpY2F0ZQIQdDJnWpUt9L9J1E+xJuLlkzAJBgUrDgMC
 # GgUAoHgwGAYKKwYBBAGCNwIBDDEKMAigAoAAoQKAADAZBgkqhkiG9w0BCQMxDAYK
 # KwYBBAGCNwIBBDAcBgorBgEEAYI3AgELMQ4wDAYKKwYBBAGCNwIBFTAjBgkqhkiG
-# 9w0BCQQxFgQUzYBc3gwtpE9UYDvN2zvJbi2dWo4wDQYJKoZIhvcNAQEBBQAEggEA
-# JkvzdfOsDAgd6Dmf+YXEuQreT66HT5sV4vPZ53c0SdXNTUuPFrvHadYc0yOpOzwI
-# TV51mKHt4Npvw1VTqCdjAQtw/gHdCjmZdmH5kj8VEzOLNu3jxTfBFes1QwTolJhT
-# L0ePmWnzTXYxxbbHvHAOhqJ6UL2OzWRo4PPCgMd5DCWHJ/f/CoQbblEwCr360OKY
-# THPNK4RgHwmdY8n8yfKXJlC/WADHYJoDRogpVdJjk1+LvN0dkLFeOblILigVayHH
-# 01DqunVDXyF2xEE8eAW2UpFAGgQpyjggutSUT+47zF7tmskcYt6lm4pCocGUBx7E
-# h1mmQzc6l7qzPsuQFX4/gQ==
+# 9w0BCQQxFgQU7dPLofUTF5+w/Hx1nVH/0sILGIwwDQYJKoZIhvcNAQEBBQAEggEA
+# S5vtikU1lyQGxqpfjRS7jvAhMLEsMqErLWfvmD+Ip0hixu/CcjVM8kulIa4ApMco
+# FmJE9wmNSOrGG+po+TUT+/j4ZvEa7NHHJ3GFlHA3UeR6f432XlmpHh9AvKC3acd6
+# +mzW0erIsJdP04joQuUqOTvQy3jAnh3OpFwSDPVgJNgaNt0zGA2OjCTvJb2J/a12
+# xH5GPVJZSGYYH9xgQiUBAKBA6DcF2zKezRZR5hHpAmVF+2oRpyP9JAUIebviek7M
+# p1QLBS2fZ//PdTN8+3YwYzYlLy5iit89Y+GiHUyMJvGm/pjWOWXVYXN38NqsqTlV
+# 7/3AtF2AeiA68AkYYPfJRg==
 # SIG # End signature block

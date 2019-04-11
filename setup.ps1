@@ -163,29 +163,6 @@ Function EnableRealTimeProtection {
     Set-MpPreference -DisableRealtimeMonitoring $false
 }
 
-Function SetupProfile {
-
-    $write_profile = $TRUE
-
-    If(Test-Path $HOME\Documents\WindowsPowerShell\Microsoft.Powershell_profile.ps1) {
-        If(Test-Path $HOME\Documents\WindowsPowerShell\Microsoft.Powershell_profile.ps1.old) {
-            Write-Host "Old powershell profile already exists. Skipping"
-            $write_profile = $FALSE
-        } Else {
-            Write-Host "Found existing powershell profile- Moving aside."
-            mv $HOME\Documents\WindowsPowerShell\Microsoft.Powershell_profile.ps1 `
-               $HOME\Documents\WindowsPowerShell\Microsoft.Powershell_profile.ps1.old
-        }
-    }
-
-    # Link the powershell profile to this powershell profile
-    If($write_profile) {
-        New-Item -Path $HOME\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1 `
-          -ItemType SymbolicLink `
-          -Value $PSScriptRoot\Microsoft.PowerShell_profile.ps1
-    }
-}
-
 Function SetupWinRMForAnsible {
     $url = "https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
     $file = "$env:temp\ConfigureRemotingForAnsible.ps1"
@@ -379,7 +356,6 @@ Function Main {
     GenerateCodeSigningCert
     ImportSelfSigningCert
     DisableRealtimeProtection
-    SetupProfile
     InstallChocolatey
     GenerateWinRMCertificate
     ImportWinRMCertificate

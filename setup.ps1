@@ -231,11 +231,7 @@ Function InstallDistro {
     #   - Set up Windows Firewall Rules
     #   - Set up Z:\ to point to the deadpool PRIVATE share
     #   - Set the default browser
-    RunAnsibleWindows
-
-    # Finally, set up the Linux environment to match what I expect everywhere
-    # in my lab and home environments
-    RunAnsibleLinux
+    RunAnsible
 
 }
 
@@ -307,21 +303,10 @@ Function RunWSLAnsibleInitPlaybook {
     }
 }
 
-Function RunAnsibleWindows {
-    bash -c "ansible-playbook ~/deployments/envsetup/ansible/windows/*.yaml"
+Function RunAnsible {
+    bash -c "make -C /home/dreddor/deployments/envsetup/ windows_host"
     if ($LASTEXITCODE -ne 0) {
         Throw "Failed Windows Ansible Install"
-    }
-}
-
-Function RunAnsibleLinux {
-    bash -c "ansible-playbook ~/deployments/envsetup/ansible/ubuntu1804/*.yaml"
-    if ($LASTEXITCODE -ne 0) {
-        Throw "Failed to install WSL packages"
-    }
-    bash -c "ansible-playbook ~/deployments/envsetup/ansible/common/*.yaml"
-    if ($LASTEXITCODE -ne 0) {
-        Throw "Running Ansible for WSL failed"
     }
 }
 

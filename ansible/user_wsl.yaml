@@ -15,21 +15,21 @@
       line: '%wheel ALL=(ALL) NOPASSWD: ALL'
       validate: 'visudo -cf %s'
 
-  - name: Add user dreddor
+  - name: Add user {{user}}
     user:
-      name: dreddor
+      name: "{{user}}"
       shell: /bin/bash
       generate_ssh_key: no
       password: $6$HXvgnNcq9W/jEMsj$JvJy7zb5eOIBFkDkQS1S3UmPTwoWjzbBynSTlBBJ3ADq3Ltb.qJUKjLpBIYB2ftrGhAfWnuZyAN8uxxPHgxBK0
       groups: wheel,admin
 
-  - name: Set up authorized keys for dreddor
+  - name: Set up authorized keys for {{user}}
     authorized_key: 
-      user: dreddor 
+      user: "{{user}}"
       state: present
       key: "{{item}}"
     with_file:
-      - /mnt/c/Users/dreddor/deployments/windeploy/ansible/ssh/id_rsa.pub
+      - /mnt/c/Users/{{user}}/deployments/windeploy/ansible/ssh/id_rsa.pub
 
   - name: Create the ansible directory
     file:
@@ -49,7 +49,7 @@
 
   - name: Install the ansible hosts file
     copy:
-      src: /mnt/c/Users/dreddor/deployments/windeploy/ansible/ansible_hosts
+      src: /mnt/c/Users/{{user}}/deployments/windeploy/ansible/ansible_hosts
       dest: /etc/ansible/hosts
       owner: root
       group: wheel
@@ -57,7 +57,7 @@
 
   - name: Install WinRM Public Certificate
     copy:
-      src: /mnt/c/Users/dreddor/deployments/windeploy/ansible/certificates/WinRMCert.pem
+      src: /mnt/c/Users/{{user}}/deployments/windeploy/ansible/certificates/WinRMCert.pem
       dest: /etc/ansible/certificates/WinRMCert.pem
       owner: root
       group: wheel
@@ -65,7 +65,7 @@
 
   - name: Install WinRM Private Certificate
     copy:
-      src: /mnt/c/Users/dreddor/deployments/windeploy/ansible/certificates/WinRMCert.pfx
+      src: /mnt/c/Users/{{user}}/deployments/windeploy/ansible/certificates/WinRMCert.pfx
       dest: /etc/ansible/certificates/WinRMCert.pfx
       owner: root
       group: wheel
@@ -85,37 +85,37 @@
       group: wheel
       mode: 0640
 
-  - name: Install id_rsa for dreddor
+  - name: Install id_rsa for {{user}}
     copy:
-      src: /mnt/c/Users/dreddor/deployments/windeploy/ansible/ssh/id_rsa
-      dest: /home/dreddor/.ssh/id_rsa
-      owner: dreddor
-      group: dreddor
+      src: /mnt/c/Users/{{user}}/deployments/windeploy/ansible/ssh/id_rsa
+      dest: /home/{{user}}/.ssh/id_rsa
+      owner: "{{user}}"
+      group: "{{user}}"
       mode: 0600
 
   - name: Create the deployments directory
     file:
-      path: /home/dreddor/deployments
+      path: /home/{{user}}/deployments
       state: directory
-      owner: dreddor
-      group: dreddor
+      owner: "{{user}}"
+      group: "{{user}}"
       mode: 0755
 
   - name: Create a link to credstore
     file:
       src: /mnt/z/credstore
-      dest: /home/dreddor/deployments/credstore
-      owner: dreddor
-      group: dreddor
+      dest: /home/{{user}}/deployments/credstore
+      owner: "{{user}}"
+      group: "{{user}}"
       state: link
       force: yes
       follow: false
 
-  - name: Cloning envsetup into dreddor/deployments
+  - name: Cloning envsetup into {{user}}/deployments
     git:
       repo: 'dreddor@dreddor.net:build/envsetup'
-      dest: "/home/dreddor/deployments/envsetup"
+      dest: "/home/{{user}}/deployments/envsetup"
       remote: origin
       accept_hostkey: yes
     become: yes
-    become_user: dreddor
+    become_user: "{{user}}"

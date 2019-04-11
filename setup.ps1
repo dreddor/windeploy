@@ -45,9 +45,29 @@ Function ClientCert-Installed {
     return $false
 }
 
+Function GenerateCodeSigningCert {
+    Write-Host "Generating Code Signing Certificate..."
+    # set the name of the local user that will have the key mapped
+    $Username = "$env:UserName"
+    $Output_Path = "$PSScriptRoot\ansible\certificates"
+    if(Test-Path $Output_Path\CodeSigningCert.pfx) {
+        Write-Host "Code Signing Certificate already generated. Skipping"
+    } Else {
+        # instead of generating a file, the cert will be added to the personal
+        # LocalComputer folder in the certificate store
+        $cert = New-SelfSignedCertificate `
+            -Subject "$Username Self-Signed Code Certificate" `
+            -Type CodeSigning `
+            -NotAfter $([datetime]::now.AddYears(5))
+
+        # export the private key in a PFX file
+        [System.IO.File]::WriteAllBytes("$Output_Path\CodeSigningCert.pfx", $cert.Export("Pfx"))
+    }
+}
+
 # Import the certificate that signed all these scripts
 Function ImportSelfSigningCert {
-    $CertPath = "$PSScriptRoot\ansible\certificates\dreddor_code_signing.cert"
+    $CertPath = "$PSScriptRoot\ansible\certificates\CodeSigningCert.pfx"
     $CertFile = Get-PfxCertificate -FilePath $CertPath
     $Thumbprint = $CertFile.Thumbprint.ToString()
     if(Get-ChildItem Cert:\LocalMachine\Root\$thumbprint -ErrorAction SilentlyContinue) {
@@ -55,14 +75,14 @@ Function ImportSelfSigningCert {
     } Else {
         $cert = ''
         Write-Host "Importing Code Signing Certificate..."
-        $cert = Import-Certificate -Filepath $CertPath `
+        $cert = Import-PfxCertificate -Filepath $CertPath `
           -CertStoreLocation cert:\LocalMachine\Root
         if (-Not $cert) {
             Throw "Could not import certificate to Cert:\LocalMachine\Root"
         }
 
         $cert = ''
-        $cert = Import-Certificate -FilePath  $CertPath `
+        $cert = Import-PfxCertificate -FilePath  $CertPath `
           -Cert Cert:\LocalMachine\TrustedPublisher
         if (-Not $cert) {
             Throw "Could not import certificate to Cert:\LocalMachine\TrustedPublisher"
@@ -220,10 +240,10 @@ Function InstallDistro {
     # Initialize users and groups for ansible
     RunWSLAnsibleInitPlaybook
 
-    # The dreddor user should have been created in the previous step, so set
-    # the default user to 'dreddor'
+    # The user should have been created in the previous step, so set the
+    # default user to '$env:UserName'
     Start-Process -FilePath $ExecPath `
-      -ArgumentList config,--default-user,dreddor `
+      -ArgumentList config,--default-user,$env:UserName `
       -NoNewWindow -Wait
 
     # Configure the Windows environment now
@@ -287,7 +307,7 @@ Function InstallChocolatey {
 }
 
 Function RunWSLAnsibleInitPlaybook {
-    bash -c "ansible-playbook /mnt/c/Users/dreddor/deployments/windeploy/ansible/user_wsl.yaml"
+    bash -c "ansible-playbook /mnt/c/Users/$env:UserName/deployments/windeploy/ansible/user_wsl.yaml -e user=$env:UserName"
     if ($LASTEXITCODE -ne 0) {
         Throw "Failed to set up WSL user"
     }
@@ -297,14 +317,14 @@ Function RunWSLAnsibleInitPlaybook {
     if (-Not (Test-Path Z:\) ) {
         net use Z: \\10.10.0.150\PRIVATE /persistent:no
     }
-    bash -c "ansible-playbook /mnt/c/Users/dreddor/deployments/windeploy/ansible/environment_wsl.yaml"
+    bash -c "ansible-playbook /mnt/c/Users/$env:UserName/deployments/windeploy/ansible/environment_wsl.yaml"
     if ($LASTEXITCODE -ne 0) {
         Throw "Failed to set up WSL environment"
     }
 }
 
 Function RunAnsible {
-    bash -c "make -C /home/dreddor/deployments/envsetup/ windows_host"
+    bash -c "make -C /home/$env:UserName/deployments/envsetup/ windows_host"
     if ($LASTEXITCODE -ne 0) {
         Throw "Failed Windows Ansible Install"
     }
@@ -356,6 +376,7 @@ Function SetTaskbarPin {
 
 Function Main {
     $Credential = GetNeededCredentials
+    GenerateCodeSigningCert
     ImportSelfSigningCert
     DisableRealtimeProtection
     SetupProfile

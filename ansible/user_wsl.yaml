@@ -70,12 +70,13 @@
       owner: root
       group: wheel
       mode: 0640
+    register: result
 
   - name: Convert the WinRM Private Certificate
     command: "openssl pkcs12 -in WinRMCert.pfx -nocerts -nodes -out cert_key.pem -passin pass: -passout pass:"
+    when: result.changed
     args:
       chdir: "/etc/ansible/certificates/"
-      creates: "/etc/ansible/certificates/cert_key.pem"
 
   - name: Set the WinRM Private Certificate permissions
     file:

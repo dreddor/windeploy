@@ -319,7 +319,7 @@ Function InstallChocolatey {
 }
 
 Function RunWSLAnsibleInitPlaybook {
-    bash -c "ansible-playbook /mnt/c/Users/$env:UserName/deployments/windeploy/ansible/user_wsl.yaml -e user=$env:UserName"
+    bash -c "ansible-playbook /mnt/c/Users/$env:UserName/deployments/windeploy/ansible/user_wsl.yaml -e user=$env:UserName -e UseRestricted=$UseRestricted"
     if ($LASTEXITCODE -ne 0) {
         Throw "Failed to set up WSL user"
     }

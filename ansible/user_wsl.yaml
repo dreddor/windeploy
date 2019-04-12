@@ -119,3 +119,12 @@
       accept_hostkey: yes
     become: yes
     become_user: "{{user}}"
+  - name: Cloning resrictedenv into {{user}}/deployments
+    git:
+      repo: 'dreddor@dreddor.net:build/restrictedenv'
+      dest: "/home/{{user}}/deployments/restrictedenv"
+      remote: origin
+      accept_hostkey: yes
+    become: yes
+    when: UseRestricted=='True'
+    become_user: "{{user}}"

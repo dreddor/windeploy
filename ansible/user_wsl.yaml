@@ -114,7 +114,7 @@
 
   - name: Cloning envsetup into {{user}}/deployments
     git:
-      repo: 'dreddor@dreddor.net:build/envsetup'
+      repo: '{{EnvsetupRepo}}'
       dest: "/home/{{user}}/deployments/envsetup"
       remote: origin
       accept_hostkey: yes

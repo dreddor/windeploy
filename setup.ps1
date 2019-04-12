@@ -1,5 +1,6 @@
 param(
-    [switch] $UseRestricted = $false
+    [switch] $UseRestricted = $false,
+    [string] $EnvsetupRepo = "https://github.com/dreddor/envsetup"
 )
 
 Set-StrictMode -Version Latest
@@ -319,7 +320,7 @@ Function InstallChocolatey {
 }
 
 Function RunWSLAnsibleInitPlaybook {
-    bash -c "ansible-playbook /mnt/c/Users/$env:UserName/deployments/windeploy/ansible/user_wsl.yaml -e user=$env:UserName -e UseRestricted=$UseRestricted"
+    bash -c "ansible-playbook /mnt/c/Users/$env:UserName/deployments/windeploy/ansible/user_wsl.yaml -e user='$env:UserName' -e UseRestricted='$UseRestricted' -e EnvsetupRepo='$EnvsetupRepo' "
     if ($LASTEXITCODE -ne 0) {
         Throw "Failed to set up WSL user"
     }

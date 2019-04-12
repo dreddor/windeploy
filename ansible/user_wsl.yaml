@@ -110,6 +110,7 @@
       state: link
       force: yes
       follow: false
+    when: UseRestricted=='True'
 
   - name: Cloning envsetup into {{user}}/deployments
     git:

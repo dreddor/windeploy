@@ -323,11 +323,13 @@ Function RunWSLAnsibleInitPlaybook {
     if ($LASTEXITCODE -ne 0) {
         Throw "Failed to set up WSL user"
     }
-    # Work around windows bug:
-    #   https://stackoverflow.com/questions/4742992/cannot-access-network-drive-in-powershell-running-as-administrator
-    #   https://support.microsoft.com/en-us/help/937624/programs-may-be-unable-to-access-some-network-locations-after-you-turn
-    if (-Not (Test-Path Z:\) ) {
-        net use Z: \\10.10.0.150\PRIVATE /persistent:no
+    if ($UseRestricted) {
+        # Work around windows bug:
+        #   https://stackoverflow.com/questions/4742992/cannot-access-network-drive-in-powershell-running-as-administrator
+        #   https://support.microsoft.com/en-us/help/937624/programs-may-be-unable-to-access-some-network-locations-after-you-turn
+        if (-Not (Test-Path Z:\) ) {
+            net use Z: \\10.10.0.150\PRIVATE /persistent:no
+        }
     }
     bash -c "ansible-playbook /mnt/c/Users/$env:UserName/deployments/windeploy/ansible/environment_wsl.yaml"
     if ($LASTEXITCODE -ne 0) {

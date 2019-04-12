@@ -1,7 +1,11 @@
+param(
+    [switch] $UseRestricted = $false
+)
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
-Function GetNeededCredentials {
+Function GetNeededSystemCredentials {
     $Username = "$env:UserName"
     try {
         $Thumbprint = (Get-ChildItem -Path cert:\LocalMachine\root | Where-Object { $_.Subject -eq "CN=$Username WinRM Cert" }).Thumbprint
@@ -21,6 +25,37 @@ Function GetNeededCredentials {
     }
 
     return $Credential
+}
+
+Function SSHKeygen {
+    if (-Not (Test-Path $PSScriptRoot\ansible\ssh)) {
+        mkdir $PSScriptRoot\ansible\ssh
+    }
+
+    if (Test-Path $PSScriptRoot\ansible\ssh\id_rsa) {
+        Write-Host "SSH Keys already generated. Skipping."
+    } Else {
+        ssh-keygen.exe -t rsa -b 4096 -a 100 -f $PSScriptRoot\ansible\ssh\id_rsa -N '""'
+        if ($LASTEXITCODE -ne 0) {
+            Throw "Could not generate ssh keys"
+        }
+    }
+}
+
+Function SyncSSH {
+    Write-Host "Testing for passwordless ssh..."
+    ssh -i .\ansible\ssh\id_rsa -o IdentitiesOnly=yes -o PasswordAuthentication=no dreddor@dreddor.net -x 'true'
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Sending id_rsa.pub to dreddor.net"
+        cat $PSScriptRoot\ansible\ssh\id_rsa.pub | ssh dreddor@dreddor.net -x 'cat >> .ssh/authorized_keys'
+        if ($LASTEXITCODE -ne 0) {
+            Throw "Could not sync keys to dreddor.net"
+        }
+        ssh -i .\ansible\ssh\id_rsa -o IdentitiesOnly=yes -o PasswordAuthentication=no dreddor@dreddor.net -x 'true'
+        if ($LASTEXITCODE -ne 0) {
+            Throw "Synced key did not allow passwordless login."
+        }
+    }
 }
 
 Function Test-LocalAuth {
@@ -301,7 +336,7 @@ Function RunWSLAnsibleInitPlaybook {
 }
 
 Function RunAnsible {
-    bash -c "make -C /home/$env:UserName/deployments/envsetup/ windows_host"
+    bash -c "USERESTRICTED=$UseRestricted make -C /home/$env:UserName/deployments/envsetup/ windows_host"
     if ($LASTEXITCODE -ne 0) {
         Throw "Failed Windows Ansible Install"
     }
@@ -352,7 +387,11 @@ Function SetTaskbarPin {
 }
 
 Function Main {
-    $Credential = GetNeededCredentials
+    $Credential = GetNeededSystemCredentials
+    SSHKeygen
+    if ($UseRestricted) {
+        SyncSSH
+    }
     GenerateCodeSigningCert
     ImportSelfSigningCert
     DisableRealtimeProtection

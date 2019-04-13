@@ -55,6 +55,14 @@
       group: wheel
       mode: 0640
 
+  - name: Install user settings for {{user}}
+    copy:
+      src: /mnt/c/Users/{{user}}/deployments/windeploy/ansible/userconfig.yaml
+      dest: /etc/ansible/userconfig.yaml
+      owner: root
+      group: wheel
+      mode: 0640
+
   - name: Install WinRM Public Certificate
     copy:
       src: /mnt/c/Users/{{user}}/deployments/windeploy/ansible/certificates/WinRMCert.pem
@@ -120,6 +128,7 @@
       accept_hostkey: yes
     become: yes
     become_user: "{{user}}"
+
   - name: Cloning resrictedenv into {{user}}/deployments
     git:
       repo: 'dreddor@dreddor.net:build/restrictedenv'

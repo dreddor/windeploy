@@ -1,3 +1,6 @@
+[all:vars]
+userconfig=/etc/ansible/userconfig.yaml
+
 [localhost]
 127.0.0.1
 

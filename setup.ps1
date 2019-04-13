@@ -1,6 +1,8 @@
 param(
     [switch] $UseRestricted = $false,
-    [string] $EnvsetupRepo = "https://github.com/dreddor/envsetup"
+    [string] $EnvsetupRepo = "https://github.com/dreddor/envsetup",
+    [string] $GitUser = "Taylor Vesely",
+    [string] $GitEmail = "dreddor@dreddor.net"
 )
 
 Set-StrictMode -Version Latest
@@ -297,6 +299,16 @@ Function SetupWSL {
     InstallDistro -distname "ubuntu1804" -disturl "https://aka.ms/wsl-ubuntu-1804"
 }
 
+Function GenerateAnsibleUserSettings {
+    $yaml = "---
+# common/git
+# windows/git
+git_user: $GitUser
+git_email: $GitEmail"
+    Out-File -FilePath $PSScriptRoot\ansible\userconfig.yaml -InputObject $yaml -Encoding ASCII
+}
+
+
 Function InstallAnsible($distname) {
     if ($distname -eq "ubuntu1804") {
         bash -c "apt-get update && sudo apt-get install python-pip git libffi-dev libssl-dev -y"
@@ -404,6 +416,7 @@ Function Main {
     SetupWinRMForAnsible
     EnableWinRMAccess -Credential $Credential
     EnableHyperV
+    GenerateAnsibleUserSettings
     SetupWSL
     EnableRealTimeProtection
 }

@@ -288,9 +288,13 @@ Function SetupWSL {
     }
 
     # Enable the WSL Feature - this will prompt for reboot if it is not already enabled
-    Write-Host "Enabling WSL. If this is not already enabled, it will prompt for reboot..."
-    Write-Host "  Note: If prompted for reboot, re-run setup again after restart"
-    Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+    if (Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux | where State -eq "Disabled") {
+        Write-Host "Enabling WSL. It will likely prompt for reboot..."
+        Write-Host "  Note: When prompted for reboot, re-run setup again after restart"
+        Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+    } Else {
+        Write-Host "WSL is already enabled. Skipping"
+    }
 
     # Set an exclusion path for windows defender on this on WSL
     Add-MpPreference -ExclusionPath $HOME\WSL

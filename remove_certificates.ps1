@@ -1,5 +1,5 @@
 Set-StrictMode -Version Latest
-$ErrorActionProference = "Stop"
+$ErrorActionPreference = "Stop"
 
 Function RemoveCodeSigningCertificates {
     $CertificatePath = "$PSScriptRoot\ansible\certificates\CodeSigningCert.pfx"

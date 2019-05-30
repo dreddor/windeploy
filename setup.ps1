@@ -312,6 +312,9 @@ git_email: $GitEmail
 
 # We are running in WSL
 is_wsl: yes
+
+# This is not vagrant
+is_vagrant: no
 "
     Out-File -FilePath $PSScriptRoot\ansible\userconfig.yaml -InputObject $yaml -Encoding ASCII
 }

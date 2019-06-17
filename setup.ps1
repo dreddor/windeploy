@@ -47,14 +47,14 @@ Function SSHKeygen {
 
 Function SyncSSH {
     Write-Host "Testing for passwordless ssh..."
-    ssh -i .\ansible\ssh\id_rsa -o IdentitiesOnly=yes -o PasswordAuthentication=no dreddor@dreddor.net -x 'true'
+    ssh -i .\ansible\ssh\id_rsa -o IdentitiesOnly=yes -o PasswordAuthentication=no  -o StrictHostKeyChecking=no dreddor@dreddor.net -x 'true'
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Sending id_rsa.pub to dreddor.net"
         cat $PSScriptRoot\ansible\ssh\id_rsa.pub | ssh dreddor@dreddor.net -x 'cat >> .ssh/authorized_keys'
         if ($LASTEXITCODE -ne 0) {
             Throw "Could not sync keys to dreddor.net"
         }
-        ssh -i .\ansible\ssh\id_rsa -o IdentitiesOnly=yes -o PasswordAuthentication=no dreddor@dreddor.net -x 'true'
+        ssh -i .\ansible\ssh\id_rsa -o IdentitiesOnly=yes -o PasswordAuthentication=no  -o StrictHostKeyChecking=no dreddor@dreddor.net -x 'true'
         if ($LASTEXITCODE -ne 0) {
             Throw "Synced key did not allow passwordless login."
         }
@@ -75,6 +75,9 @@ Function Test-LocalAuth {
 
 Function ClientCert-Installed {
     param($Thumbprint)
+    if (!(Test-WSMan -ErrorAction SilentlyContinue)) {
+        return $false
+    }
     $HasClientCert = (ls WSMan:\localhost\ClientCertificate\ | Get-ChildItem | Where-Object { $_.Name -eq "Issuer" }) `
                         | Where-Object { $_.Value -eq $Thumbprint }
     if ($HasClientCert) {
@@ -88,6 +91,10 @@ Function GenerateCodeSigningCert {
     # set the name of the local user that will have the key mapped
     $Username = "$env:UserName"
     $Output_Path = "$PSScriptRoot\ansible\certificates"
+    if(-Not(Test-Path $Output_Path)) {
+        mkdir $Output_Path
+    }
+
     if(Test-Path $Output_Path\CodeSigningCert.pfx) {
         Write-Host "Code Signing Certificate already generated. Skipping"
     } Else {
@@ -133,6 +140,10 @@ Function GenerateWinRMCertificate {
     # set the name of the local user that will have the key mapped
     $Username = "$env:UserName"
     $Output_Path = "$PSScriptRoot\ansible\certificates"
+    if (-NOT (Test-Path $Output_Path) ) {
+        mkdir $Output_Path
+    }
+
     if(Test-Path $Output_Path\WinRMCert.pfx) {
         Write-Host "WinRM Certificate already generated. Skipping"
     } Else {
@@ -423,9 +434,9 @@ Function Main {
     ImportSelfSigningCert
     DisableRealtimeProtection
     InstallChocolatey
+    SetupWinRMForAnsible
     GenerateWinRMCertificate
     ImportWinRMCertificate
-    SetupWinRMForAnsible
     EnableWinRMAccess -Credential $Credential
     EnableHyperV
     GenerateAnsibleUserSettings

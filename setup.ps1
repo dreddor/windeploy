@@ -1,5 +1,6 @@
 param(
     [switch] $UseRestricted = $false,
+    [switch] $RunAnsible = $true,
     [switch] $SkipReboot = $false,
     [string] $EnvsetupRepo = "https://github.com/dreddor/envsetup",
     [string] $GitUser = "Taylor Vesely",
@@ -281,13 +282,6 @@ Function InstallDistro {
       -ArgumentList config,--default-user,$env:UserName `
       -NoNewWindow -Wait
 
-    # Configure the Windows environment now
-    #   - Install Windows Applications
-    #   - Set up Windows Firewall Rules
-    #   - Set up Z:\ to point to the deadpool PRIVATE share
-    #   - Set the default browser
-    RunAnsible
-
 }
 
 Function EnableHyperV {
@@ -473,6 +467,15 @@ Function Main {
     EnableHyperV
     GenerateAnsibleUserSettings
     SetupWSL
+
+    if($RunAnsible -eq $true) {
+        # Configure the envsetup script for the Windows environment now
+        #   - Install Windows Applications
+        #   - Set up Windows Firewall Rules
+        #   - Set the default browser
+        RunAnsible
+    }
+
     EnableRealTimeProtection
 }
 

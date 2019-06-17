@@ -308,7 +308,11 @@ Function GenerateAnsibleUserSettings {
 # common/git
 # windows/git
 git_user: $GitUser
-git_email: $GitEmail"
+git_email: $GitEmail
+
+# We are running in WSL
+is_wsl: yes
+"
     Out-File -FilePath $PSScriptRoot\ansible\userconfig.yaml -InputObject $yaml -Encoding ASCII
 }
 

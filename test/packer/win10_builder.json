@@ -1,0 +1,48 @@
+{
+    "builders": [
+        {
+            "type": "virtualbox-iso",
+            "communicator": "winrm",
+            "iso_url": "{{user `iso`}}",
+            "iso_checksum": "{{user `iso_md5`}}",
+            "iso_checksum_type": "md5",
+            "vm_name": "win10_base_image",
+            "output_directory": "./builds",
+            "floppy_files": [
+                "./scripts/Autounattend.xml",
+                "./scripts/winrm_up.ps1"
+            ],
+            "winrm_username": "vagrant",
+            "winrm_password": "vagrant",
+            "winrm_timeout": "4h",
+            "guest_os_type": "Windows10_64",
+            "shutdown_command": "shutdown /s -t 7",
+            "vboxmanage": [
+                ["modifyvm", "{{.Name}}", "--memory", "4092"],
+                ["modifyvm", "{{.Name}}", "--cpus", "4"],
+                ["modifyvm", "{{.Name}}", "--vram", "48"]
+              ],
+            "shutdown_timeout": "1h",
+            "guest_additions_mode": "disable"
+        },
+        {
+            "type":  "hyperv-iso",
+            "communicator": "winrm",
+            "iso_url": "{{user `iso`}}",
+            "iso_checksum": "{{user `iso_md5`}}",
+            "iso_checksum_type": "md5",
+            "vm_name": "win10_base_image",
+            "output_directory": "./builds",
+            "floppy_files": [
+                "./scripts/Autounattend.xml",
+                "./scripts/winrm_up.ps1"
+            ],
+            "winrm_username": "vagrant",
+            "winrm_password": "vagrant",
+            "winrm_timeout": "4h",
+            "shutdown_command": "shutdown /s -t 7",
+            "cpus": 4,
+            "memory": "4092"
+        }
+    ]
+}

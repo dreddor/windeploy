@@ -1,0 +1,61 @@
+{
+    "builders": [
+        {
+            "type": "virtualbox-ovf",
+            "communicator": "winrm",
+            "source_path": "./builds/win10_base_image.ovf",
+            "vm_name": "win10_base_image_sysprep",
+            "output_directory": "./sysprep_build",
+            "winrm_username": "vagrant",
+            "winrm_password": "vagrant",
+            "winrm_timeout": "4h",
+            "shutdown_command": "C:/temp/run_sysprep.bat",
+            "vboxmanage": [
+                ["modifyvm", "{{.Name}}", "--memory", "4092"],
+                ["modifyvm", "{{.Name}}", "--cpus", "4"],
+                ["modifyvm", "{{.Name}}", "--vram", "48"],
+                ["modifyvm", "{{.Name}}", "--natpf1", "winrmhttp,tcp,,27001,,5985"]
+              ],
+            "shutdown_timeout": "1h",
+            "guest_additions_mode": "disable"
+        },
+        {
+            "type":  "hyperv-vmcx",
+            "communicator": "winrm",
+            "clone_from_vmcx_path": "builds",
+            "vm_name": "win10_base_image_sysprep",
+            "output_directory": "./sysprep_build",
+            "winrm_username": "vagrant",
+            "winrm_password": "vagrant",
+            "winrm_timeout": "4h",
+            "switch_name": "Default Switch",
+            "shutdown_command": "C:/temp/run_sysprep.bat",
+            "cpus": 4,
+            "memory": "4092",
+            "shutdown_timeout": "1h"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell-local",
+            "only": ["hyperv-vmcx"],
+            "command": "powershell.exe -ExecutionPolicy ByPass ./scripts/hyperv_get_ansible_ip.ps1"
+        },
+        {
+            "type": "shell-local",
+            "only": ["hyperv-vmcx"],
+            "command": "ansible-playbook -vv -i hyperv_host.ini -i ansible_packer_host_hyperv.ini main.yaml"
+        },
+        {
+            "type": "shell-local",
+            "only": ["virtualbox-ovf"],
+            "command": "ansible-playbook -vv -i ansible_packer_host_virtualbox.ini main.yaml"
+        }
+    ],
+    "post-processors": [
+        {
+            "type": "vagrant",
+            "output": "boxes/win10.box"
+        }
+    ]
+}

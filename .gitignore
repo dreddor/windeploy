@@ -4,3 +4,10 @@ WinRMCert.pfx
 id_rsa
 id_rsa.pub
 userconfig.yaml
+test/packer/builds/*
+test/packer/boxes/*
+test/packer/iso/*
+test/packer/packer_cache/*
+test/vagrant/.vagrant/*
+test/packer/hyperv_host.ini
+

@@ -1,0 +1,56 @@
+---
+- hosts: windows
+  tasks:
+    # https://superuser.com/questions/1214281/how-to-hide-or-disable-allow-pc-to-be-discoverable-on-this-network
+    - name: Disable network discoverability dialog
+      win_regedit:
+        path: HKLM:\SYSTEM\CurrentControlSet\Control\Network\NewNetworkWindowOff
+    - name: Create Temp directory if not exists
+      win_file:
+        path: C:\Temp\
+        state: directory
+    # These three scripts are called in this order:
+    #   packer -> 'shutdown_command' -> run_sysprep.bat
+    #   run_sysprep.bat ->
+    #     - Turn on the Windows firewall to block WinRM until we want it to be available
+    #     - Run any remaining cleanup before sysprep runs that could not be run by Ansible
+    #     - Call sysprep with the unattend.xml answer file
+    #   sysprep -> unattend.xml ->
+    #     - Brings the image back to the 'Out of the Box' experience
+    #     - Runs any commands specified by the 'specialize' section of unattend.xml
+    #     - See the Windows documentation for more about sysprep
+    #   unattend.xml -> finish_sysprep.ps1
+    #     - Runs any customizations that should be run before turning back on WinRM
+    #     - Turns back on WinRM
+    #
+    # Most of the cleanup of the image should be performed by ansible, but
+    # anything that can't be done until the sysprep stage should either be done
+    # in the run_sysprep.bat, the unattend.xml, or the finish_sysprep stage.
+    - name: Copy sysprep unattend.xml to host
+      win_copy:
+        src: scripts/unattend.xml
+        dest: C:\temp\unattend.xml
+    # This script is called by packer in the 'shutdown_command' after ansible
+    # runs. The sysprep start script will disable WinRM and then run sysprep
+    # using the unattend.xml file above.
+    - name: Copy sysprep start script to host
+      win_copy:
+        src: scripts/run_sysprep.bat
+        dest: C:\temp\run_sysprep.bat
+    # This script will be run as soon as Vagrant comes up, so anything that
+    # needs to be performed to get the image ready to talk to Vagrant should
+    # be performed here- unless it makes more sense to put it as an extra
+    # command to be run in unattend.xml
+    - name: Copy sysprep script to host
+      win_copy:
+        src: scripts/finish_sysprep.ps1
+        dest: C:\temp\finish_sysprep.ps1
+    - name: Install all security, critical, and rollup updates
+      win_updates:
+        category_names:
+          - SecurityUpdates
+          - CriticalUpdates
+          - UpdateRollups
+        reboot: yes
+    # Pre-sysprep cleanup should be done here.
+

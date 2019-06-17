@@ -1,5 +1,6 @@
 param(
     [switch] $UseRestricted = $false,
+    [switch] $SkipReboot = $false,
     [string] $EnvsetupRepo = "https://github.com/dreddor/envsetup",
     [string] $GitUser = "Taylor Vesely",
     [string] $GitEmail = "dreddor@dreddor.net",
@@ -8,6 +9,9 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+# Set to reboot if needed
+$RestartNeeded = $false
 
 Function GetNeededSystemCredentials {
     $Username = "$env:UserName"
@@ -289,7 +293,12 @@ Function InstallDistro {
 Function EnableHyperV {
     if (Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V | where State -eq "Disabled") {
         Write-Host "Enabling Hyper-V"
-        Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
+        $result = Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All -NoRestart
+
+        # Schedule restart if needed
+        if ($result.RestartNeeded -eq $true) {
+            $RestartNeeded = $true
+        }
     } Else {
         Write-Host "HyperV is already enabled. Skipping"
     }
@@ -305,9 +314,13 @@ Function SetupWSL {
 
     # Enable the WSL Feature - this will prompt for reboot if it is not already enabled
     if (Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux | where State -eq "Disabled") {
-        Write-Host "Enabling WSL. It will likely prompt for reboot..."
-        Write-Host "  Note: When prompted for reboot, re-run setup again after restart"
-        Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+        $result = Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux -NoRestart
+
+        # Schedule restart if needed
+        if ($result.RestartNeeded -eq $true) {
+            $RestartNeeded = $true
+        }
+
     } Else {
         Write-Host "WSL is already enabled. Skipping"
     }
@@ -315,8 +328,22 @@ Function SetupWSL {
     # Set an exclusion path for windows defender on this on WSL
     Add-MpPreference -ExclusionPath $HOME\WSL
 
+    # Don't try to install a distro if a restart is needed
+    if ($RestartNeeded -eq $true) {
+        ScheduleReboot
+        exit 0
+    }
     # Download the WSL ubuntu image if it does not already exist
     InstallDistro -distname "ubuntu1804" -disturl "https://aka.ms/wsl-ubuntu-1804"
+}
+
+Function ScheduleReboot {
+    Write-Host "Reboot needed to continue installation..."
+    Write-Host "  after reboot, re-run setup.ps1 again to continue installation"
+    if ($SkipReboot -ne $true) {
+        Write-Host "Notice: Going down for reboot in 30 seconds"
+        shutdown -r -t 30
+    }
 }
 
 Function GenerateAnsibleUserSettings {

@@ -347,10 +347,11 @@ Function RunWSLAnsibleInitPlaybook {
         if (-Not (Test-Path Z:\) ) {
             net use Z: \\10.10.0.150\PRIVATE /persistent:no
         }
-    }
-    bash -c "ansible-playbook /mnt/c/Users/$env:UserName/deployments/windeploy/ansible/environment_wsl.yaml"
-    if ($LASTEXITCODE -ne 0) {
-        Throw "Failed to set up WSL environment"
+
+        bash -c "ansible-playbook /mnt/c/Users/$env:UserName/deployments/windeploy/ansible/environment_wsl.yaml"
+        if ($LASTEXITCODE -ne 0) {
+            Throw "Failed to set up WSL environment"
+        }
     }
 }
 

@@ -2,7 +2,8 @@ param(
     [switch] $UseRestricted = $false,
     [string] $EnvsetupRepo = "https://github.com/dreddor/envsetup",
     [string] $GitUser = "Taylor Vesely",
-    [string] $GitEmail = "dreddor@dreddor.net"
+    [string] $GitEmail = "dreddor@dreddor.net",
+    [PSCredential] $CredentialArg = $null
 )
 
 Set-StrictMode -Version Latest
@@ -17,8 +18,12 @@ Function GetNeededSystemCredentials {
     }
 
     if (-Not (ClientCert-Installed -Thumbprint $Thumbprint)) {
-        $Password = Read-Host "Enter Password" -AsSecureString
-        $Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $username, $password
+        if($CredentialArg -eq $null) {
+            $Password = Read-Host "Enter Password" -AsSecureString
+            $Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $username, $password
+        } Else {
+            $Credential = $CredentialArg
+        }
 
         if (-Not (Test-LocalAuth -Credential $Credential).PasswordValid) {
             Throw "Invalid Credentials"

@@ -125,6 +125,7 @@
       repo: '{{EnvsetupRepo}}'
       dest: "/home/{{user}}/deployments/envsetup"
       remote: origin
+      version: "{{GitBranch}}"
       accept_hostkey: yes
     become: yes
     become_user: "{{user}}"

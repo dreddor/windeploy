@@ -2,7 +2,9 @@ param(
     [switch] $UseRestricted = $false,
     [string] $EnvsetupRepo = "https://github.com/dreddor/envsetup",
     [string] $GitUser = "Taylor Vesely",
-    [string] $GitEmail = "dreddor@dreddor.net"
+    [string] $GitEmail = "dreddor@dreddor.net",
+    [string] $GitBranch = "master",
+    [string] $WindeployBranch = "master"
 )
 
 Set-StrictMode -Version Latest
@@ -14,9 +16,9 @@ Function Main {
     }
 
     if(-Not(Test-Path $env:HOMEPATH\deployments\windeploy)) {
-        Invoke-WebRequest -Uri "https://github.com/dreddor/windeploy/archive/master.zip" -OutFile C:\windeploy.zip
+        Invoke-WebRequest -Uri "https://codeload.github.com/dreddor/windeploy/zip/$WindeployBranch" -OutFile C:\windeploy.zip
         Expand-Archive -Path C:\windeploy.zip -DestinationPath C:\
-        mv C:\windeploy-master $env:HOMEPATH\deployments\windeploy
+        mv C:\windeploy-$WindeployBranch $env:HOMEPATH\deployments\windeploy
     }
 
     $user = "vagrant"
@@ -30,6 +32,7 @@ Function Main {
       -EnvsetupRepo $EnvsetupRepo `
       -GitUser $GitUser `
       -GitEmail $GitEmail `
+      -GitBranch $GitBranch `
       -CredentialArg $Credential
 }
 

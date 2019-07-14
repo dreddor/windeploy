@@ -5,6 +5,7 @@ param(
     [string] $EnvsetupRepo = "https://github.com/dreddor/envsetup",
     [string] $GitUser = "Taylor Vesely",
     [string] $GitEmail = "dreddor@dreddor.net",
+    [string] $GitBranch = "master",
     [PSCredential] $CredentialArg = $null
 )
 
@@ -359,7 +360,7 @@ is_vagrant: no
 
 Function InstallAnsible($distname) {
     if ($distname -eq "ubuntu1804") {
-        bash -c "apt-get update && sudo apt-get install python-pip git libffi-dev libssl-dev -y"
+        bash -c 'export DEBIAN_FRONTEND=noninteractive; apt-get update && apt-get --option "Dpkg::Options::=--force-confdef" --option "Dpkg::Options::=--force-confold" install python-pip git libffi-dev libssl-dev -y'
         if ($LASTEXITCODE -ne 0) {
             Throw "Could not install ansible dependencies"
         }
@@ -380,7 +381,7 @@ Function InstallChocolatey {
 }
 
 Function RunWSLAnsibleInitPlaybook {
-    bash -c "ansible-playbook /mnt/c/Users/$env:UserName/deployments/windeploy/ansible/user_wsl.yaml -e user='$env:UserName' -e UseRestricted='$UseRestricted' -e EnvsetupRepo='$EnvsetupRepo' "
+    bash -c "ansible-playbook /mnt/c/Users/$env:UserName/deployments/windeploy/ansible/user_wsl.yaml -e user='$env:UserName' -e UseRestricted='$UseRestricted' -e EnvsetupRepo='$EnvsetupRepo' -e GitBranch=$GitBranch "
     if ($LASTEXITCODE -ne 0) {
         Throw "Failed to set up WSL user"
     }
@@ -400,7 +401,11 @@ Function RunWSLAnsibleInitPlaybook {
 }
 
 Function RunAnsible {
-    bash -c "USERESTRICTED=$UseRestricted make -C /home/$env:UserName/deployments/envsetup/ windows_host"
+    if ($UseRestricted) {
+        bash -c "ansible-playbook /home/$env:UserName/deployments/restrictedenv/main.yaml"
+    } Else {
+        bash -c "ansible-playbook /home/$env:UserName/deployments/envsetup/main.yaml"
+    }
     if ($LASTEXITCODE -ne 0) {
         Throw "Failed Windows Ansible Install"
     }

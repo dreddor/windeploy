@@ -109,17 +109,6 @@
       group: "{{user}}"
       mode: 0755
 
-  - name: Create a link to credstore
-    file:
-      src: /mnt/z/credstore
-      dest: /home/{{user}}/deployments/credstore
-      owner: "{{user}}"
-      group: "{{user}}"
-      state: link
-      force: yes
-      follow: false
-    when: UseRestricted=='True'
-
   - name: Cloning envsetup into {{user}}/deployments
     git:
       repo: '{{EnvsetupRepo}}'

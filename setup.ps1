@@ -360,11 +360,11 @@ is_vagrant: no
 
 Function InstallAnsible($distname) {
     if ($distname -eq "ubuntu1804") {
-        bash -c 'export DEBIAN_FRONTEND=noninteractive; apt-get update && apt-get --option "Dpkg::Options::=--force-confdef" --option "Dpkg::Options::=--force-confold" install python-pip git libffi-dev libssl-dev -y'
+        bash -c 'export DEBIAN_FRONTEND=noninteractive; apt-get update && apt-get --option "Dpkg::Options::=--force-confdef" --option "Dpkg::Options::=--force-confold" install python3-pip git libffi-dev libssl-dev -y'
         if ($LASTEXITCODE -ne 0) {
             Throw "Could not install ansible dependencies"
         }
-        bash -c "pip install ansible pywinrm"
+        bash -c "pip3 install ansible pywinrm"
         if ($LASTEXITCODE -ne 0) {
             Throw "Could not install ansible"
         }

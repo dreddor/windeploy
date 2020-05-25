@@ -6,6 +6,7 @@ param(
     [string] $GitUser = "Taylor Vesely",
     [string] $GitEmail = "dreddor@dreddor.net",
     [string] $GitBranch = "master",
+    [int] $WSLVersion = 2,
     [PSCredential] $CredentialArg = $null
 )
 
@@ -328,6 +329,14 @@ Function SetupWSL {
         ScheduleReboot
         exit 0
     }
+
+    Write-Host "Setting default WSL version to $WSLVersion."
+    # Set WSL2 as the default WSL version
+    wsl --set-default-version $WSLVersion
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Could not set default WSL version. Skipping"
+    }
+
     # Download the WSL ubuntu image if it does not already exist
     InstallDistro -distname "ubuntu1804" -disturl "https://aka.ms/wsl-ubuntu-1804"
 }

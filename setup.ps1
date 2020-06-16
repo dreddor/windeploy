@@ -332,7 +332,7 @@ Function SetupWSL {
 
     Write-Host "Setting default WSL version to $WSLVersion."
     # Set WSL2 as the default WSL version
-    wsl --set-default-version $WSLVersion
+    wsl --set-default-version $WSLVersion | Out-Null
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Could not set default WSL version. Skipping"
     }

@@ -357,9 +357,6 @@ Function GenerateAnsibleUserSettings {
 git_user: $GitUser
 git_email: $GitEmail
 
-# We are running in WSL
-is_wsl: yes
-
 # This is not vagrant
 is_vagrant: no
 "

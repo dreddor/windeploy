@@ -2,11 +2,23 @@
 - hosts: localhost 
   become: yes
   tasks:
+  - name: Checking WSL version...
+    set_fact:
+      is_wsl1: "{{ ansible_facts['kernel'] is match('.*Microsoft.*') }}"
+      is_wsl2: "{{ ansible_facts['kernel'] is match('.*microsoft.*') }}"
+  - shell: "tail -1 /etc/resolv.conf | cut -d' ' -f2"
+    when: is_wsl2
+    register: cmd
+    changed_when: false
+  - set_fact:
+      is_wsl: "{{ is_wsl1 or is_wsl2 }}"
+      host_address: "{{ is_wsl2 | ternary(cmd.stdout, '127.0.0.1') }}"
+
   - name: Make sure we have a 'wheel' group
     group:
       name: wheel
       state: present
-  
+
   - name: Allow 'wheel' group to have passwordless sudo
     lineinfile:
       dest: /etc/sudoers
@@ -128,3 +140,14 @@
     become: yes
     when: UseRestricted=='True'
     become_user: "{{user}}"
+
+  - name: Cloning systemd enablement repo
+    git:
+      repo: "https://github.com/damionGans/ubuntu-wsl2-systemd-script"
+      dest: "{{ ansible_env.HOME }}/deployments/ubuntu-wsl2-systemd-script"
+      remote: origin
+    register: systemd_git
+    when: is_wsl2
+  - name: Installing systemd enablement package
+    command: "{{ ansible_env.HOME }}/deployments/ubuntu-wsl2-systemd-script/ubuntu-wsl2-systemd-script.sh --force"
+    when: systemd_git.changed

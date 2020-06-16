@@ -7,13 +7,3 @@ userconfig=/etc/ansible/userconfig.yaml
 [localhost:vars]
 ansible_connection=local
 ansible_python_interpreter="{{ansible_playbook_python}}"
-
-[windows]
-windows.localhost ansible_host=localhost
-
-[windows:vars]
-ansible_connection=winrm
-ansible_winrm_cert_pem=/etc/ansible/certificates/WinRMCert.pem
-ansible_winrm_cert_key_pem=/etc/ansible/certificates/cert_key.pem
-ansible_winrm_transport=certificate
-ansible_winrm_server_cert_validation=ignore
